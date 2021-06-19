@@ -72,7 +72,7 @@ const ListButton = props => {
   );
 };
 
-export default function ClippedDrawer(props) {
+export default function SectionDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -88,7 +88,7 @@ export default function ClippedDrawer(props) {
       <div className={classes.drawerContainer}>
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListButton text={text}>
+            <ListButton text={text} key={text}>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListButton>
           ))}
@@ -96,7 +96,7 @@ export default function ClippedDrawer(props) {
         <Divider className={classes.divide} />
         <List>
           {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListButton text={text}>
+            <ListButton text={text} key={text}>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListButton>
           ))}

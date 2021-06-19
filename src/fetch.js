@@ -14,8 +14,8 @@ export default function decorateFetch(origin) {
     const finalUrl = baseUrl + url;
     const finalOptions = options; // getting a reference
     finalOptions.credentials = 'include';
-    console.warn(`Apply base url: ${url}, result: ${finalUrl}`);
-    console.warn(`Modifying credentials to: include`);
+    console.log(`Apply base url: ${url}, result: ${finalUrl}`);
+    console.log(`Modifying credentials to: include`);
     return originalFetch(finalUrl, finalOptions);
   };
 }
