@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   },
   logo: {
     height: '30px',
-    width: '240px',
+    width: global.drawerWidth,
     // marginBottom: theme.spacing(2),
     marginLeft: 0,
   },

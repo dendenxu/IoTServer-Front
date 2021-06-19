@@ -15,11 +15,9 @@ import MailIcon from '@material-ui/icons/Mail';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 
-const drawerWidth = 240;
-
 const useStyles = makeStyles(theme => ({
   drawerPaper: {
-    width: drawerWidth,
+    width: global.drawerWidth,
     background: theme.palette.background.widget,
   },
   drawerContainer: {
@@ -27,6 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
   icon: {
     color: theme.palette.secondary.main,
+    margin: theme.spacing(1.5),
   },
   item: {
     background: theme.palette.background.button,
@@ -47,6 +46,32 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const ListButton = props => {
+  const { text, ...other } = props;
+  const classes = useStyles();
+
+  return (
+    <ListItem key={text}>
+      <Button
+        varian="contained"
+        className={classes.item}
+        fullWidth
+        size="small"
+        {...other}
+      >
+        <div className={`${classes.icon} ${classes.flex}`}>
+          {props.children}
+        </div>
+        <div className={classes.flex}>
+          <Typography variant="h6" className={classes.semibold}>
+            {text}
+          </Typography>
+        </div>
+      </Button>
+    </ListItem>
+  );
+};
+
 export default function ClippedDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
@@ -63,36 +88,17 @@ export default function ClippedDrawer(props) {
       <div className={classes.drawerContainer}>
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text}>
-              <Button
-                varian="contained"
-                className={classes.item}
-                fullWidth
-                size="small"
-              >
-                <div className={classes.flex}>
-                  <IconButton className={classes.icon}>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </IconButton>
-                  <div className={classes.flex}>
-                    <Typography variant="h6" className={classes.semibold}>
-                      {text}
-                    </Typography>
-                  </div>
-                </div>
-              </Button>
-            </ListItem>
+            <ListButton text={text}>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListButton>
           ))}
         </List>
         <Divider className={classes.divide} />
         <List>
           {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text} className={classes.item}>
-              <ListItemIcon className={classes.icon}>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
+            <ListButton text={text}>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListButton>
           ))}
         </List>
       </div>
