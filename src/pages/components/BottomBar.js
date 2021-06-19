@@ -7,18 +7,30 @@ export default function BottomBar(props) {
   return (
     <Grid container spacing={2} className={className}>
       <Grid item xs={spaceOut}>
-        <Link color="textSecondary" href="neon-cubes.xyz" variant="caption">
-          帮助
+        <Link
+          color="textSecondary"
+          href="https://neon-cubes.xyz"
+          variant="body2"
+        >
+          Help
         </Link>
       </Grid>
       <Grid item>
-        <Link color="textSecondary" href="neon-cubes.xyz" variant="caption">
-          使用条款
+        <Link
+          color="textSecondary"
+          href="https://neon-cubes.xyz"
+          variant="body2"
+        >
+          Terms
         </Link>
       </Grid>
       <Grid item>
-        <Link color="textSecondary" href="neon-cubes.xyz" variant="caption">
-          隐私协议
+        <Link
+          color="textSecondary"
+          href="https://neon-cubes.xyz"
+          variant="body2"
+        >
+          Privacy
         </Link>
       </Grid>
     </Grid>

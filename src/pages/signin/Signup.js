@@ -211,7 +211,7 @@ const useStyles = makeStyles(theme => {
       paddingBottom: theme.spacing(0),
     },
 
-    centeredText: {
+    centeredFlex: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -628,7 +628,7 @@ function Signup(props) {
               }
               label={
                 <Typography
-                  className={classes.centeredText}
+                  className={classes.centeredFlex}
                   variant="caption"
                   style={{
                     marginLeft: -5,

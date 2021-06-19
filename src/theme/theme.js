@@ -40,7 +40,7 @@ const theme = createMuiTheme({
       'Rajdhani',
       'Teko',
       'PT Sans',
-      // 'Harlow Solid Italic',
+      'Harlow Solid Italic',
       // 'Roboto',
       // 'Josefin Sans',
       // 'Josefin Slab',

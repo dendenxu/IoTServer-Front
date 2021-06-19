@@ -15,7 +15,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Toolbar from '@material-ui/core/Toolbar';
-import { ReactComponent as Icon } from '../../assets/images/icon.svg';
 import BottomBar from '../components/BottomBar';
 import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';

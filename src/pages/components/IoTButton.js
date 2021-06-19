@@ -1,3 +1,4 @@
+import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import React, { useState } from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
@@ -18,6 +19,15 @@ export default function IoTButton(props) {
       variant="contained"
       color="primary"
       {...props}
-    />
+    >
+      <Typography
+        variant="body1"
+        style={{
+          fontWeight: 'bold',
+        }}
+      >
+        {props.children}
+      </Typography>
+    </Button>
   );
 }

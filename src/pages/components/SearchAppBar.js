@@ -14,8 +14,18 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import { ReactComponent as Icon } from '../../assets/images/icon.svg';
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    paddingLeft: 0,
+  },
+  logo: {
+    height: '30px',
+    width: '240px',
+    // marginBottom: theme.spacing(2),
+    marginLeft: 0,
+  },
   grow: {
     flexGrow: 1,
   },
@@ -39,7 +49,6 @@ const useStyles = makeStyles(theme => ({
     marginLeft: 0,
     width: '100%',
     [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
       width: 'auto',
     },
   },
@@ -179,15 +188,8 @@ export default function PrimarySearchAppBar(props) {
         background: theme.palette.background.widget,
       }}
     >
-      <Toolbar>
-        <Typography
-          className={classes.title}
-          variant="h6"
-          noWrap
-          color="secondary"
-        >
-          Material-UI
-        </Typography>
+      <Toolbar className={classes.root}>
+        <Icon className={classes.logo} />
         <div className={classes.search}>
           <div className={classes.searchIcon}>
             <SearchIcon

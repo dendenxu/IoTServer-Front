@@ -20,6 +20,7 @@ import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
+import ToggleBox from '../components/ToggleBox';
 
 const useStyles = makeStyles(theme => ({
   // TODO: fix these ugly naming...
@@ -32,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '600px',
   },
   paper: {
-    marginTop: -theme.spacing(12),
+    marginTop: -theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -45,6 +46,9 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.widget,
     padding: theme.spacing(3),
     width: '90%',
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+    },
     marginTop: theme.spacing(1),
     position: 'relative',
   },
@@ -76,30 +80,10 @@ const useStyles = makeStyles(theme => ({
     height: '100%',
   },
 
-  checkboxContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    // width: "100%"
-    marginTop: theme.spacing(-0.5),
-    padding: 0,
-  },
-
-  avatarButton: {
-    borderRadius: '14px',
-    textTransform: 'none',
-    marginBottom: theme.spacing(1),
-    padding: '2px 6px',
-  },
-  smallAvatar: {
-    width: theme.spacing(2),
-    height: theme.spacing(2),
-  },
-  centeredText: {
+  centeredFlex: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    // ! special operation for Josefin Sans
-    transform: 'translate(0px,1.5px)',
   },
   icon: {
     width: '100%',
@@ -136,20 +120,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-async function checkSigninStatus() {
-  // const [signedIn, setSignedIn] = useState(false);
-  const response = await fetch('/check_signed_in');
-  console.log(response);
-  const message = await response.json();
-
-  if (response.ok) {
-    console.log(message);
-    console.log('User is signed in, redirecting');
-    return true;
-  }
-  return false;
-}
-
 function Signin(props) {
   const { width } = props;
 
@@ -163,6 +133,7 @@ function Signin(props) {
   const [validEmail, setValidEmail] = useState('');
   const [validFormEmail, setValidFormEmail] = useState('');
   const [passwordInvalid, setPasswordInvalid] = useState(false);
+  const [inputEmpty, setInputEmpty] = useState(false);
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [emailFormInvalid, setEmailFormInvalid] = useState(false);
 
@@ -179,7 +150,6 @@ function Signin(props) {
     InputLabelProps: {
       classes: {
         root: classes.textFieldInput,
-        // focused: {},
       },
     },
     FormHelperTextProps: {
@@ -195,18 +165,18 @@ function Signin(props) {
   const defaultHelperTextPlaceHolder = '　';
   let inputBoxHelpterText = defaultHelperTextPlaceHolder; // some white spaces to take up the width
 
-  // if (location.error) {
-  //   setPasswordInvalid(true);
-  // }
-
   if (afterEmailCheck) {
     if (passwordInvalid) {
-      inputBoxHelpterText = '您输入的密码不正确';
+      inputBoxHelpterText = 'Your password is incorrect';
+    } else if (inputEmpty) {
+      inputBoxHelpterText = 'Please input your password';
     }
   } else if (emailFormInvalid) {
-    inputBoxHelpterText = '您输入的邮箱格式不正确';
+    inputBoxHelpterText = 'Your Email is invalid';
   } else if (emailInvalid) {
-    inputBoxHelpterText = '您输入的邮箱不在数据库中';
+    inputBoxHelpterText = "Your Email hasn't been registered";
+  } else if (inputEmpty) {
+    inputBoxHelpterText = 'Please input your Email';
   }
 
   const handleClick = async () => {
@@ -262,6 +232,8 @@ function Signin(props) {
     };
 
     setLoadingData(true);
+    console.log(`Received input: ${inputContent}, is empty?: ${!inputContent}`);
+    setInputEmpty(!inputContent);
     try {
       if (!afterEmailCheck) {
         if (!validFormEmail) {
@@ -288,6 +260,7 @@ function Signin(props) {
   const handleInputChange = event => {
     const text = event.target.value;
     setInputContent(text);
+    setInputEmpty(!text);
 
     const re =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -337,42 +310,57 @@ function Signin(props) {
             position="absolute"
             top={0}
           >
-            <Typography component="h1" variant="h5" className={classes.welcome}>
-              {afterEmailCheck ? '欢迎' : '登录'}
+            <Typography component="h1" variant="h4" className={classes.welcome}>
+              {afterEmailCheck ? 'Welcome' : 'Login'}
             </Typography>
             {afterEmailCheck ? (
               <AvatarBar
                 email={validEmail}
                 avatarSrc="https://avatars.githubusercontent.com/u/43734697?v=4"
-                handleAvatarClick={handleAvatarClick}
-                avatarButtonClass={classes.avatarButton}
-                avatarIconClass={classes.smallAvatar}
-                avatarSourceClass={classes.centeredText}
+                onClick={handleAvatarClick}
               />
             ) : (
               <Typography
                 component="h1"
-                variant="body2"
+                variant="body1"
                 className={classes.welcome}
               >
-                使用您的 IoT Server 账号
+                Use your{' '}
+                <span
+                  style={{
+                    fontFamily: 'Harlow Solid Italic',
+                  }}
+                >
+                  IoT Server
+                </span>{' '}
+                registration Email
               </Typography>
             )}
 
             <Container className={classes.checkboxInput}>
               <IoTextField
+                onKeyDown={event => {
+                  if (event.key === 'Enter') {
+                    console.log(`Getting on key down event:`);
+                    console.log(event);
+                    handleClick();
+                  }
+                }}
                 error={
                   afterEmailCheck
-                    ? passwordInvalid
-                    : emailInvalid || emailFormInvalid
+                    ? passwordInvalid || inputEmpty
+                    : emailInvalid || emailFormInvalid || inputEmpty
                 }
                 variant="outlined"
                 size={textFieldSize}
                 id="username_input_field"
                 {...textFieldClassProps}
-                label={
-                  !afterEmailCheck ? '输入您的电子邮件地址' : '输入您的登录密码'
+                placeholder={
+                  !afterEmailCheck
+                    ? 'Input Your Email Address'
+                    : 'Input Your Password'
                 }
+                label={!afterEmailCheck ? 'Email Address' : 'Password'}
                 helperText={inputBoxHelpterText}
                 name="username"
                 autoFocus
@@ -383,48 +371,24 @@ function Signin(props) {
                 type={afterEmailCheck && !showPassword ? 'password' : ''}
               />
 
-              {afterEmailCheck ? (
-                <Container className={classes.checkboxContainer}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        value="remember"
-                        color="secondary"
-                        size="small"
-                      />
-                    }
-                    label={
-                      <Typography
-                        className={classes.centeredText}
-                        variant="caption"
-                        style={{
-                          marginLeft: -5,
-                        }}
-                      >
-                        显示密码
-                      </Typography>
-                    }
-                    checked={showPassword}
-                    onChange={handleCheckBoxChange}
-                    style={{
-                      marginRight: 0,
-                    }}
-                  />
-                </Container>
-              ) : (
-                <div />
+              {afterEmailCheck && (
+                <ToggleBox
+                  text="Show Password"
+                  checked={showPassword}
+                  onChange={handleCheckBoxChange}
+                />
               )}
             </Container>
 
             <Container className={classes.submit}>
               <Link
                 onClick={handleSignup}
-                variant="caption"
-                className={classes.centeredText}
+                variant="body2"
+                className={classes.centeredFlex}
               >
-                创建新账号
+                Register Account
               </Link>
-              <IoTButton onClick={handleClick}>下一步</IoTButton>
+              <IoTButton onClick={handleClick}>Next</IoTButton>
             </Container>
 
             <Container>
