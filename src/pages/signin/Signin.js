@@ -19,6 +19,7 @@ import BottomBar from '../components/BottomBar';
 import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
+import IoTButton from '../components/IoTButton';
 
 const useStyles = makeStyles(theme => ({
   // TODO: fix these ugly naming...
@@ -82,13 +83,7 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(-0.5),
     padding: 0,
   },
-  nextButton: {
-    // background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
-    borderRadius: '10px',
-    border: 0,
-    padding: '30 30px',
-    // boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
-  },
+
   avatarButton: {
     borderRadius: '14px',
     textTransform: 'none',
@@ -360,7 +355,7 @@ function Signin(props) {
                 variant="body2"
                 className={classes.welcome}
               >
-                使用您的 MediConnect 账号
+                使用您的 IoT Server 账号
               </Typography>
             )}
 
@@ -429,17 +424,7 @@ function Signin(props) {
               >
                 创建新账号
               </Link>
-              <Button
-                className={classes.nextButton}
-                type="submit"
-                variant="contained"
-                color="primary"
-                onClick={handleClick}
-              >
-                {/* <Typography variant="body2" color="text.dark"> */}
-                下一步
-                {/* </Typography> */}
-              </Button>
+              <IoTButton onClick={handleClick}>下一步</IoTButton>
             </Container>
 
             <Container>

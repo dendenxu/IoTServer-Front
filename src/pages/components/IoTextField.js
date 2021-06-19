@@ -13,6 +13,15 @@ const useStyle = makeStyles(theme => ({
         // borderWidth: 1
       },
     },
+    // '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+    //   borderColor: theme.palette.text.secondary,
+    // },
+    // '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+    //   borderColor: theme.palette.primary.main,
+    // },
+    // '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    //   borderColor: theme.palette.primary.main,
+    // },
   },
 }));
 

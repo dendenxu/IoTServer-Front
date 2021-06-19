@@ -12,7 +12,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
@@ -20,6 +20,7 @@ import { ReactComponent as Icon } from '../../assets/images/icon.svg';
 import BottomBar from '../components/BottomBar';
 import Copyright from '../components/Copyright';
 import IoTextField from '../components/IoTextField';
+import IoTButton from '../components/IoTButton';
 
 const useStyles = makeStyles(theme => {
   const gridPadding = theme.spacing(0.5, 2.5);
@@ -66,7 +67,7 @@ const useStyles = makeStyles(theme => {
       borderRadius: 30,
       backgroundColor: theme.palette.background.widget,
       padding: theme.spacing(3),
-      width: '90%',
+      width: '100%',
       marginTop: theme.spacing(1),
     },
 
@@ -120,10 +121,11 @@ const useStyles = makeStyles(theme => {
       height: '100%',
     },
 
-    accountType: {
+    accountTypeButton: {
       padding: theme.spacing(0),
       margin: theme.spacing(0),
       marginRight: theme.spacing(-1),
+      color: theme.palette.text.secondary,
     },
 
     emailInputContainer: containerStyle,
@@ -158,10 +160,6 @@ const useStyles = makeStyles(theme => {
       width: twoFraction,
       height: '100%',
     },
-
-    labelRoot: { color: 'rgba(0, 0, 0, 0.35)' },
-    labelFocused: {},
-    label: {},
 
     jumpContainer: {
       margin: theme.spacing(0, 0, 2),
@@ -229,7 +227,7 @@ const useStyles = makeStyles(theme => {
     helperText: {
       fontSize: '0.75rem',
       [theme.breakpoints.down('xs')]: {
-        fontSize: '0.6rem',
+        fontSize: '0.5rem',
       },
     },
   };
@@ -239,11 +237,13 @@ function Signup(props) {
   const { width } = props;
   const classes = useStyles();
   const history = useHistory();
+  const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const ITEM_HEIGHT = 48;
-  const accountTypeDisplay = ['患者', '医生'];
-  const accountTypeStorage = ['patient', 'doctor'];
+  // const accountTypeDisplay = ['小型车辆', '机器人', '无人机', '监视器'];
+  // const accountTypeStorage = ['Car', 'Bot', 'Drone', 'Monitor'];
+  const accountTypeDisplay = ['普通用户', '管理员', '数据库管理员', '匿名用户'];
+  const accountTypeStorage = ['USER', 'ADMIN', 'DBA', 'GUEST'];
 
   const [showPassword, setShowPassword] = useState(false);
   const [inputContent, setInputContent] = useState('');
@@ -282,7 +282,8 @@ function Signup(props) {
 
   // note that this is a full-width space
   // material ui seems to ignore the half-width one
-  const defaultHelperTextPlaceHolder = isWidthDown('xs', width) ? '' : '　';
+  // const defaultHelperTextPlaceHolder = isWidthDown('xs', width) ? '' : '　';
+  const defaultHelperTextPlaceHolder = '　';
 
   let lastNameHelperText = defaultHelperTextPlaceHolder;
   let firstNameHelperText = defaultHelperTextPlaceHolder;
@@ -472,7 +473,7 @@ function Signup(props) {
             <Icon className={classes.logo} />
 
             <Typography component="h1" variant="h5" className={classes.welcome}>
-              创建您的MediConnect账号
+              创建您的 IoT Server 账号
             </Typography>
           </Container>
 
@@ -521,13 +522,14 @@ function Signup(props) {
                 autoFocus
                 value={accountTypeDisplay[accountType] ?? ''}
                 InputLabelProps={IoTextFieldClassProps.InputLabelProps}
+                FormHelperTextProps={IoTextFieldClassProps.FormHelperTextProps}
                 InputProps={{
                   ...IoTextFieldClassProps.InputProps,
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        className={classes.accountType}
+                        className={classes.accountTypeButton}
                         aria-label="more"
                         aria-controls="menu"
                         aria-haspopup="true"
@@ -543,10 +545,10 @@ function Signup(props) {
                         onClose={handleMenuItemClick(0)}
                         PaperProps={{
                           style: {
-                            maxHeight: ITEM_HEIGHT * 2,
-                            width: '20ch',
+                            background: theme.palette.background.widget,
                           },
                         }}
+                        style={{}}
                       >
                         {[...accountTypeDisplay.keys()].map(key => (
                           <MenuItem
@@ -554,7 +556,9 @@ function Signup(props) {
                             selected={key === 0}
                             onClick={handleMenuItemClick(key)}
                           >
-                            {accountTypeDisplay[key]}
+                            <Typography variant="caption">
+                              {accountTypeDisplay[key]}
+                            </Typography>
                           </MenuItem>
                         ))}
                       </Menu>
@@ -652,15 +656,7 @@ function Signup(props) {
             >
               登录现有账号
             </Link>
-            <Button
-              className={classes.nextButton}
-              type="jumpContainer"
-              variant="contained"
-              color="primary"
-              onClick={handleNextClick}
-            >
-              下一步
-            </Button>
+            <IoTButton onClick={handleNextClick}>下一步</IoTButton>
           </Container>
         </Box>
 

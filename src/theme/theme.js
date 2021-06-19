@@ -36,8 +36,13 @@ const theme = createMuiTheme({
   },
   typography: {
     fontFamily: [
-      'Josefin Sans',
-      'Josefin Slab',
+      'Rajdhani',
+      'Teko',
+      'PT Sans',
+      // 'Harlow Solid Italic',
+      // 'Roboto',
+      // 'Josefin Sans',
+      // 'Josefin Slab',
       'Noto Sans SC',
       'PingFang SC',
       'sans-serif',
