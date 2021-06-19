@@ -546,7 +546,6 @@ function Signup(props) {
                             background: theme.palette.background.widget,
                           },
                         }}
-                        style={{}}
                       >
                         {[...accountTypeDisplay.keys()].map(key => (
                           <MenuItem

@@ -253,7 +253,7 @@ function Signin(props) {
       if (response.ok) {
         setPasswordInvalid(false);
         history.push({
-          pathname: '/search',
+          pathname: '/home',
           state: { email: validEmail },
         });
       } else {

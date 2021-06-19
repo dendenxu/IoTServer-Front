@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import Signin from './pages/signin/Signin';
 import Signup from './pages/signin/Signup';
+import Home from './pages/home/Home';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         </Route>
         <Route path="/signin" component={Signin} />
         <Route path="/signup" component={Signup} />
+        <Route path="/home" component={Home} />
 
         <Route>
           <NoMatch />

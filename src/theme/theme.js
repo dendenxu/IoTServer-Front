@@ -20,6 +20,7 @@ const theme = createMuiTheme({
     background: {
       default: '#111',
       widget: '#222',
+      button: '#333',
     },
     light: {
       main: '#eee',
