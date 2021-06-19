@@ -347,13 +347,11 @@ function Signup(props) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // id: validFormEmail,
           email: validFormEmail,
-          firstname: firstName,
-          lastname: lastName,
-          passwd: password,
-          type: accountTypeStorage[accountType],
-          // role: ['ADMIN'], //! dangerous now
+          firstName,
+          lastName,
+          password,
+          role: [accountTypeStorage[accountType]],
         }),
       });
 
