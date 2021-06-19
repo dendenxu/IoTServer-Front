@@ -1,6 +1,7 @@
 import TextField from '@material-ui/core/TextField';
 import React, { useState } from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
 
 const useStyle = makeStyles(theme => ({
   input: {
@@ -13,21 +14,42 @@ const useStyle = makeStyles(theme => ({
         // borderWidth: 1
       },
     },
-    // '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-    //   borderColor: theme.palette.text.secondary,
-    // },
-    // '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-    //   borderColor: theme.palette.primary.main,
-    // },
-    // '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    //   borderColor: theme.palette.primary.main,
-    // },
   },
 }));
 
-export default function IoTextField(props) {
+function IoTextField(props) {
+  const { width } = props;
   const theme = useTheme();
-  const { input } = useStyle();
+  const classes = useStyle();
 
-  return <TextField className={input} {...props} />;
+  const IoTextFieldSize = isWidthDown('xs', width) ? 'small' : 'medium';
+  const IoTextFieldClassProps = {
+    InputProps: {
+      classes: {
+        root: classes.IoTextFieldInput,
+      },
+    },
+    InputLabelProps: {
+      classes: {
+        root: classes.IoTextFieldInput,
+        // focused: {},
+      },
+    },
+    FormHelperTextProps: {
+      classes: {
+        root: classes.IoTextHelperText,
+      },
+    },
+  };
+
+  return (
+    <TextField
+      className={classes.input}
+      size={IoTextFieldSize}
+      {...IoTextFieldClassProps}
+      {...props}
+    />
+  );
 }
+
+export default withWidth()(IoTextField);

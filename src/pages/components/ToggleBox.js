@@ -5,15 +5,14 @@ import React, { useState } from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
-  checkboxContainer: {
+  root: {
     display: 'flex',
     justifyContent: 'flex-end',
-    width: '100%',
     marginTop: theme.spacing(-2),
     padding: 0,
   },
 
-  centeredFlex: {
+  flex: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -21,15 +20,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function ToggleBox(props) {
-  const { text, ...other } = props;
+  const { text, className, ...other } = props;
   const classes = useStyles();
 
   return (
-    <div className={classes.checkboxContainer} {...other}>
+    <div className={`${classes.root} ${className}`} {...other}>
       <FormControlLabel
         control={<Checkbox value="remember" color="secondary" size="small" />}
         label={
-          <div className={classes.centeredFlex}>
+          <div className={classes.flex}>
             <Typography
               variant="caption"
               style={{

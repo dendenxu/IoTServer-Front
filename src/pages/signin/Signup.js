@@ -21,6 +21,7 @@ import BottomBar from '../components/BottomBar';
 import Copyright from '../components/Copyright';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
+import ToggleBox from '../components/ToggleBox';
 
 const useStyles = makeStyles(theme => {
   const gridPadding = theme.spacing(0.5, 2.5);
@@ -49,7 +50,7 @@ const useStyles = makeStyles(theme => {
     },
 
     signUpContainer: {
-      marginTop: theme.spacing(-8),
+      marginTop: -theme.spacing(4),
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -84,8 +85,8 @@ const useStyles = makeStyles(theme => {
     },
 
     logo: {
-      width: '45%',
-      height: '45%',
+      width: '50%',
+      height: '50%',
       marginBottom: theme.spacing(2),
     },
 
@@ -111,7 +112,7 @@ const useStyles = makeStyles(theme => {
       height: '100%',
     },
 
-    accountTypeInputBox: {
+    usetTypeInputBox: {
       padding: theme.spacing(0),
       margin: theme.spacing(0),
       display: 'flex',
@@ -121,7 +122,7 @@ const useStyles = makeStyles(theme => {
       height: '100%',
     },
 
-    accountTypeButton: {
+    usetTypeButton: {
       padding: theme.spacing(0),
       margin: theme.spacing(0),
       marginRight: theme.spacing(-1),
@@ -201,34 +202,19 @@ const useStyles = makeStyles(theme => {
     },
 
     checkboxContainer: {
-      display: 'flex',
-      justifyContent: 'flex-start',
       margin: theme.spacing(0),
       marginTop: theme.spacing(-1),
       marginBottom: theme.spacing(2),
       padding: gridPadding,
       paddingTop: theme.spacing(0),
       paddingBottom: theme.spacing(0),
+      width: '100%',
     },
 
     centeredFlex: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      // ! special operation for Josefin Sans
-      transform: 'translate(0px,1.5px)',
-    },
-    IoTextFieldInput: {
-      fontSize: '1rem',
-      [theme.breakpoints.down('xs')]: {
-        fontSize: '0.8rem',
-      },
-    },
-    helperText: {
-      fontSize: '0.75rem',
-      [theme.breakpoints.down('xs')]: {
-        fontSize: '0.5rem',
-      },
     },
   };
 });
@@ -240,10 +226,8 @@ function Signup(props) {
   const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  // const accountTypeDisplay = ['小型车辆', '机器人', '无人机', '监视器'];
-  // const accountTypeStorage = ['Car', 'Bot', 'Drone', 'Monitor'];
-  const accountTypeDisplay = ['普通用户', '管理员', '数据库管理员', '匿名用户'];
-  const accountTypeStorage = ['USER', 'ADMIN', 'DBA', 'GUEST'];
+  const usetTypeDisplay = ['USER', 'ADMIN', 'DBA', 'GUEST'];
+  const usetTypeStorage = ['USER', 'ADMIN', 'DBA', 'GUEST'];
 
   const [showPassword, setShowPassword] = useState(false);
   const [inputContent, setInputContent] = useState('');
@@ -253,66 +237,46 @@ function Signup(props) {
   const [emailFormInvalid, setEmailFormInvalid] = useState(false);
   const [lastNameInvalid, setLastNameInvalid] = useState(false);
   const [firstNameInvalid, setFirstNameInvalid] = useState(false);
-  const [accountTypeInvalid, setAccountTypeInvalid] = useState(false);
+  const [usetTypeInvalid, setusetTypeInvalid] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [accountType, setAccountType] = useState(-1);
+  const [usetType, setusetType] = useState(-1);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  const IoTextFieldSize = isWidthDown('xs', width) ? 'small' : 'medium';
-  const IoTextFieldClassProps = {
-    InputProps: {
-      classes: {
-        root: classes.IoTextFieldInput,
-      },
-    },
-    InputLabelProps: {
-      classes: {
-        root: classes.IoTextFieldInput,
-        // focused: {},
-      },
-    },
-    FormHelperTextProps: {
-      classes: {
-        root: classes.helperText,
-      },
-    },
-  };
-
   // note that this is a full-width space
   // material ui seems to ignore the half-width one
-  // const defaultHelperTextPlaceHolder = isWidthDown('xs', width) ? '' : '　';
+  // const defaultHelperTextPlaceHolder = isWidthDown('xs', width) || '　';
   const defaultHelperTextPlaceHolder = '　';
 
   let lastNameHelperText = defaultHelperTextPlaceHolder;
   let firstNameHelperText = defaultHelperTextPlaceHolder;
-  let accountTypeHelperText = defaultHelperTextPlaceHolder;
+  let usetTypeHelperText = defaultHelperTextPlaceHolder;
   let emailBoxHelperText = defaultHelperTextPlaceHolder; // some white spaces to take up the width
   let passwordHelperText = defaultHelperTextPlaceHolder;
   let passwordConfirmHelperText = defaultHelperTextPlaceHolder;
 
   if (passwordInvalid) {
-    passwordHelperText = '密码应有至少8个字符';
+    passwordHelperText = 'Password should contain at least 8 characters';
   }
   if (password !== passwordConfirm) {
-    passwordConfirmHelperText = '两次输入密码不一致';
+    passwordConfirmHelperText = "Your password doesn't match";
   }
   if (emailFormInvalid) {
     // check the form first
-    emailBoxHelperText = '请输入有效的邮箱地址';
+    emailBoxHelperText = 'Your Email is invalid';
   } else if (emailAlreadyTaken) {
-    emailBoxHelperText = '您输入的邮箱已注册';
+    emailBoxHelperText = 'This Email is already registered';
   }
 
   if (lastNameInvalid) {
-    lastNameHelperText = '请填写姓氏';
+    lastNameHelperText = 'Input last name';
   }
   if (firstNameInvalid) {
-    firstNameHelperText = '请填写名字';
+    firstNameHelperText = 'Input first name';
   }
-  if (accountTypeInvalid) {
-    accountTypeHelperText = '请选择类型';
+  if (usetTypeInvalid) {
+    usetTypeHelperText = 'Select an user type';
   }
 
   const handleNextClick = async () => {
@@ -351,7 +315,7 @@ function Signup(props) {
           firstName,
           lastName,
           password,
-          role: [accountTypeStorage[accountType]],
+          role: [usetTypeStorage[usetType]],
         }),
       });
 
@@ -380,8 +344,8 @@ function Signup(props) {
         setLastNameInvalid(true);
         allchecked = false;
       }
-      if (!(accountType in [...accountTypeDisplay.keys()])) {
-        setAccountTypeInvalid(true);
+      if (!(usetType in [...usetTypeDisplay.keys()])) {
+        setusetTypeInvalid(true);
         allchecked = false;
       }
       if (password.length < 8) {
@@ -404,14 +368,14 @@ function Signup(props) {
   };
 
   const open = Boolean(anchorEl);
-  const handleAccountTypeClick = event => {
+  const handleusetTypeClick = event => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuItemClick = idx => event => {
     setAnchorEl(null);
-    setAccountType(idx);
-    setAccountTypeInvalid(false);
+    setusetType(idx);
+    setusetTypeInvalid(false);
   };
   const handleFirstNameInput = event => {
     const text = event.target.value;
@@ -437,7 +401,7 @@ function Signup(props) {
     setEmailFormInvalid(invalid);
     console.log(`Getting new email text: ${text}`);
     console.log(`Setting email form invalid: ${invalid}`);
-    setValidFormEmail(invalid ? '' : text);
+    setValidFormEmail(invalid || text);
   };
 
   const handlePasswordInput = event => {
@@ -471,7 +435,15 @@ function Signup(props) {
             <Icon className={classes.logo} />
 
             <Typography component="h1" variant="h5" className={classes.welcome}>
-              创建您的 IoT Server 账号
+              {isWidthDown('xs', width) ? 'Register on' : 'Register Your'}{' '}
+              <span
+                style={{
+                  fontFamily: 'Harlow Solid Italic',
+                }}
+              >
+                IoT Server
+              </span>{' '}
+              {isWidthDown('xs', width) || 'Account'}
             </Typography>
           </Container>
 
@@ -480,15 +452,13 @@ function Signup(props) {
               <IoTextField
                 error={lastNameInvalid}
                 variant="outlined"
-                size={IoTextFieldSize}
-                id="user_second_name"
-                label="姓氏"
+                id="user_last_name"
+                label={isWidthDown('xs', width) ? 'Last' : 'Last Name'}
                 helperText={lastNameHelperText}
-                name="user_second_name"
+                name="user_last_name"
                 autoFocus
                 value={lastName}
                 onChange={handleLastNameInput}
-                {...IoTextFieldClassProps}
               />
             </Container>
 
@@ -496,42 +466,36 @@ function Signup(props) {
               <IoTextField
                 error={firstNameInvalid}
                 variant="outlined"
-                size={IoTextFieldSize}
                 id="user_first_name"
-                label="名字"
+                label={isWidthDown('xs', width) ? 'First' : 'First Name'}
                 helperText={firstNameHelperText}
                 name="user_first_name"
                 autoFocus
                 value={firstName}
                 onChange={handleFirstNameInput}
-                {...IoTextFieldClassProps}
               />
             </Container>
 
-            <Container className={classes.accountTypeInputBox}>
+            <Container className={classes.usetTypeInputBox}>
               <IoTextField
-                error={accountTypeInvalid}
+                error={usetTypeInvalid}
                 variant="outlined"
-                size={IoTextFieldSize}
                 id="user_account_type"
-                label={isWidthDown('xs', width) ? '类型' : '账户类型'}
-                helperText={accountTypeHelperText}
+                label={isWidthDown('xs', width) ? 'Type' : 'User Type'}
+                helperText={usetTypeHelperText}
                 name="user_account_typen"
                 autoFocus
-                value={accountTypeDisplay[accountType] ?? ''}
-                InputLabelProps={IoTextFieldClassProps.InputLabelProps}
-                FormHelperTextProps={IoTextFieldClassProps.FormHelperTextProps}
+                value={usetTypeDisplay[usetType] ?? ''}
                 InputProps={{
-                  ...IoTextFieldClassProps.InputProps,
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        className={classes.accountTypeButton}
+                        className={classes.usetTypeButton}
                         aria-label="more"
                         aria-controls="menu"
                         aria-haspopup="true"
-                        onClick={handleAccountTypeClick}
+                        onClick={handleusetTypeClick}
                       >
                         <MoreVertIcon />
                       </IconButton>
@@ -547,14 +511,14 @@ function Signup(props) {
                           },
                         }}
                       >
-                        {[...accountTypeDisplay.keys()].map(key => (
+                        {[...usetTypeDisplay.keys()].map(key => (
                           <MenuItem
                             key={key}
                             selected={key === 0}
                             onClick={handleMenuItemClick(key)}
                           >
                             <Typography variant="caption">
-                              {accountTypeDisplay[key]}
+                              {usetTypeDisplay[key]}
                             </Typography>
                           </MenuItem>
                         ))}
@@ -571,16 +535,14 @@ function Signup(props) {
               <IoTextField
                 error={emailAlreadyTaken || emailFormInvalid}
                 variant="outlined"
-                size={IoTextFieldSize}
                 id="username"
-                label="邮箱账号"
+                label="Email Address"
                 helperText={emailBoxHelperText}
                 name="username"
                 autoFocus
                 fullWidth
                 value={inputContent}
                 onChange={handleEmailInput}
-                {...IoTextFieldClassProps}
               />
             </Container>
           </Container>
@@ -590,15 +552,13 @@ function Signup(props) {
               <IoTextField
                 error={passwordInvalid}
                 variant="outlined"
-                size={IoTextFieldSize}
                 id="user_password"
-                label="密码"
+                label="Password"
                 helperText={passwordHelperText}
                 name="user_password"
                 autoFocus
                 value={password}
                 onChange={handlePasswordInput}
-                {...IoTextFieldClassProps}
                 type={!showPassword ? 'password' : ''}
               />
             </Container>
@@ -607,53 +567,34 @@ function Signup(props) {
               <IoTextField
                 error={password !== passwordConfirm}
                 variant="outlined"
-                size={IoTextFieldSize}
                 id="user_password_confirm"
-                label="确认密码"
+                label="Confirmation"
                 helperText={passwordConfirmHelperText}
                 name="user_password_confirm"
                 autoFocus
                 value={passwordConfirm}
                 onChange={handlePasswordConfirm}
-                {...IoTextFieldClassProps}
                 type={!showPassword ? 'password' : ''}
               />
             </Container>
           </Container>
 
-          <Container className={classes.checkboxContainer}>
-            <FormControlLabel
-              control={
-                <Checkbox value="remember" color="secondary" size="small" />
-              }
-              label={
-                <Typography
-                  className={classes.centeredFlex}
-                  variant="caption"
-                  style={{
-                    marginLeft: -5,
-                  }}
-                >
-                  显示密码
-                </Typography>
-              }
-              checked={showPassword}
-              onChange={handleCheckBoxChange}
-              style={{
-                marginRight: 0,
-              }}
-            />
-          </Container>
+          <ToggleBox
+            text="Show Password"
+            checked={showPassword}
+            onChange={handleCheckBoxChange}
+            className={classes.checkboxContainer}
+          />
 
           <Container className={classes.jumpContainer}>
             <Link
               onClick={handleLogin}
-              variant="caption"
+              variant="body2"
               className={classes.jumpToSignIn}
             >
-              登录现有账号
+              Login Account
             </Link>
-            <IoTButton onClick={handleNextClick}>下一步</IoTButton>
+            <IoTButton onClick={handleNextClick}>Next</IoTButton>
           </Container>
         </Box>
 

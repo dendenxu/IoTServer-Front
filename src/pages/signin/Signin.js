@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     height: '100vh',
     maxWidth: '600px',
   },
-  paper: {
+  main: {
     marginTop: -theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
@@ -52,25 +52,17 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
     position: 'relative',
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
+  registerAndNext: {
     margin: theme.spacing(3.5, 0, 10),
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  welcome: {
+  welcomeText: {
     margin: theme.spacing(1, 0, 1),
     color: theme.palette.secondary.main,
   },
-  checkboxInput: {
+  inputAndCheckbox: {
     padding: theme.spacing(0),
     margin: theme.spacing(1, 0, -0.5),
     display: 'flex',
@@ -94,22 +86,6 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(3),
     display: 'flex',
     justifyContent: 'center',
-  },
-  copyrightText: {
-    // fontWeight: 300,
-  },
-  buttomBar: {},
-  textFieldInput: {
-    fontSize: '1rem',
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '0.8rem',
-    },
-  },
-  helperText: {
-    fontSize: '0.75rem',
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '0.6rem',
-    },
   },
   loadingProgress: {
     // color: '#27CD86',
@@ -137,27 +113,7 @@ function Signin(props) {
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [emailFormInvalid, setEmailFormInvalid] = useState(false);
 
-  // const textFieldSize = isWidthDown('xs', width) ? 'small' : 'medium';
-  const textFieldSize = 'medium';
   const [loadingData, setLoadingData] = useState(false);
-
-  const textFieldClassProps = {
-    InputProps: {
-      classes: {
-        root: classes.textFieldInput,
-      },
-    },
-    InputLabelProps: {
-      classes: {
-        root: classes.textFieldInput,
-      },
-    },
-    FormHelperTextProps: {
-      classes: {
-        root: classes.helperText,
-      },
-    },
-  };
 
   // note that this is a full-width space
   // material ui seems to ignore the half-width one
@@ -285,7 +241,7 @@ function Signin(props) {
   return (
     <Container component="main" className={classes.verticalContainer}>
       <CssBaseline />
-      <Container className={classes.paper}>
+      <Container className={classes.main}>
         <Icon className={classes.icon} />
 
         <Box style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -310,7 +266,11 @@ function Signin(props) {
             position="absolute"
             top={0}
           >
-            <Typography component="h1" variant="h4" className={classes.welcome}>
+            <Typography
+              component="h1"
+              variant="h4"
+              className={classes.welcomeText}
+            >
               {afterEmailCheck ? 'Welcome' : 'Login'}
             </Typography>
             {afterEmailCheck ? (
@@ -323,9 +283,9 @@ function Signin(props) {
               <Typography
                 component="h1"
                 variant="body1"
-                className={classes.welcome}
+                className={classes.welcomeText}
               >
-                Use your{' '}
+                Use Your{' '}
                 <span
                   style={{
                     fontFamily: 'Harlow Solid Italic',
@@ -333,11 +293,11 @@ function Signin(props) {
                 >
                   IoT Server
                 </span>{' '}
-                registration Email
+                {isWidthDown('xs', width) || 'Registration'} Email
               </Typography>
             )}
 
-            <Container className={classes.checkboxInput}>
+            <Container className={classes.inputAndCheckbox}>
               <IoTextField
                 onKeyDown={event => {
                   if (event.key === 'Enter') {
@@ -352,9 +312,8 @@ function Signin(props) {
                     : emailInvalid || emailFormInvalid || inputEmpty
                 }
                 variant="outlined"
-                size={textFieldSize}
+                size="medium"
                 id="username_input_field"
-                {...textFieldClassProps}
                 placeholder={
                   !afterEmailCheck
                     ? 'Input Your Email Address'
@@ -376,11 +335,14 @@ function Signin(props) {
                   text="Show Password"
                   checked={showPassword}
                   onChange={handleCheckBoxChange}
+                  style={{
+                    width: '100%',
+                  }}
                 />
               )}
             </Container>
 
-            <Container className={classes.submit}>
+            <Container className={classes.registerAndNext}>
               <Link
                 onClick={handleSignup}
                 variant="body2"
@@ -392,7 +354,7 @@ function Signin(props) {
             </Container>
 
             <Container>
-              <BottomBar className={classes.buttomBar} spaceOut />
+              <BottomBar spaceOut />
             </Container>
           </Container>
         </Box>
