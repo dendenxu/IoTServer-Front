@@ -53,7 +53,19 @@ function Home(props) {
   const location = useLocation();
   const [countDown, setCountDown] = useState(5);
   const [email, setEmail] = useState(location.state && location.state.email);
-  const [updated, setUpdated] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const handleRefresh = e => {
+    // e.preventDefault();
+    setLoadingData(true);
+  };
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleRefresh);
+    return () => {
+      window.removeEventListener('beforeunload', handleRefresh);
+    };
+  }, []);
 
   useEffect(async () => {
     if (!email) {
@@ -62,7 +74,9 @@ function Home(props) {
         const body = await response.json();
         setEmail(body.email); // update email
       }
-      setUpdated(true);
+      setLoadingData(false);
+    } else {
+      setLoadingData(false);
     }
   }, []); // no dependency
 
@@ -83,7 +97,7 @@ function Home(props) {
     };
   }, [countDown, email]); // depends on countDown and email
 
-  if (updated && !email) {
+  if (!loadingData && !email) {
     return (
       <div>
         <CssBaseline />
@@ -104,7 +118,10 @@ function Home(props) {
   }
 
   return (
-    <div className={classes.growWidth}>
+    <div
+      className={classes.growWidth}
+      style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
+    >
       <CssBaseline />
       <SearchAppBar position="fixed" className={classes.appBar} />
       <SectionDrawer className={classes.drawer} />

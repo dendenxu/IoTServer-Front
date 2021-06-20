@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -242,6 +242,18 @@ function Signin(props) {
   const handleSignup = event => {
     history.push('/signup');
   };
+
+  useEffect(async () => {
+    const response = await fetch('/api/account/auth');
+    if (response.ok) {
+      const body = await response.json();
+
+      history.push({
+        pathname: '/home',
+        state: { email: body.email },
+      });
+    }
+  }, []); // no dependency
 
   return (
     <Container component="main" className={classes.verticalContainer}>
