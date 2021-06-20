@@ -1,9 +1,69 @@
 /* eslint-disable react/display-name */
 import * as React from 'react';
 import Button from '@material-ui/core/Button';
+import InputBase from '@material-ui/core/InputBase';
 import Typography from '@material-ui/core/Typography';
 import { DataGrid } from '@material-ui/data-grid';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  table: {
+    fontSize: '1rem',
+    fontWeight: '500',
+    margin: theme.spacing(3),
+    border: 'none',
+    background: theme.palette.background.widget,
+    '& .MuiDataGrid-columnSeparator': {
+      color: theme.palette.primary.main,
+    },
+    color: theme.palette.text.secondary,
+    '& .MuiDataGrid-columnsContainer': {
+      border: 'none',
+      color: theme.palette.text.primary,
+      fontSize: '1.4rem',
+      fontWeight: 'normal',
+      fontFamily: 'Teko',
+    },
+    '& .MuiDataGrid-cell': {
+      border: 'none',
+    },
+    '& .MuiDataGrid-cell:focus': {
+      outline: 'none',
+      background: fade(theme.palette.primary.main, 0.1),
+    },
+    '& .MuiDataGrid-editCellInputBase': {
+      fontSize: '1.0rem',
+    },
+  },
+
+  normal: {
+    background: '#0000',
+  },
+  error: {
+    background: fade(theme.palette.error.main, 0.1),
+  },
+  flex: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}));
+
+const renderBold = params => {
+  const theme = useTheme();
+  console.log(params);
+  return (
+    <Typography
+      style={{
+        fontSize: '1.1rem',
+        fontWeight: 'bold',
+        color: theme.palette.text.secondary,
+      }}
+    >
+      {params.value}
+    </Typography>
+  );
+};
 
 const columns = [
   {
@@ -15,21 +75,7 @@ const columns = [
 
     // type: 'number',
     // valueGetter: params => `${params.getValue(params.id, 'mqttId') || ''}`,
-    renderCell: params => {
-      const theme = useTheme();
-      console.log(params);
-      return (
-        <Typography
-          style={{
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-            color: theme.palette.text.secondary,
-          }}
-        >
-          {params.value}
-        </Typography>
-      );
-    },
+    renderCell: renderBold,
   },
   {
     field: 'name',
@@ -37,21 +83,7 @@ const columns = [
     width: 120,
     editable: true,
     // resizable: true,
-    renderCell: params => {
-      const theme = useTheme();
-      console.log(params);
-      return (
-        <Typography
-          style={{
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-            color: theme.palette.text.secondary,
-          }}
-        >
-          {params.value}
-        </Typography>
-      );
-    },
+    renderCell: renderBold,
   },
   {
     field: 'desc',
@@ -179,37 +211,6 @@ const rows = [
     alert: 0,
   },
 ];
-
-const useStyles = makeStyles(theme => ({
-  table: {
-    fontSize: '1rem',
-    fontWeight: '500',
-    margin: theme.spacing(3),
-    borderWidth: 0,
-    background: theme.palette.background.widget,
-    '& .MuiDataGrid-columnSeparator': {
-      color: theme.palette.primary.main,
-    },
-    color: theme.palette.text.secondary,
-    '& .MuiDataGrid-columnsContainer': {
-      borderWidth: 0,
-      color: theme.palette.text.primary,
-      fontSize: '1.4rem',
-      fontWeight: 'normal',
-      fontFamily: 'Teko',
-    },
-    '& .MuiDataGrid-cell': {
-      borderWidth: 0,
-    },
-  },
-
-  normal: {
-    background: '#0000',
-  },
-  error: {
-    background: fade(theme.palette.error.main, 0.1),
-  },
-}));
 
 export default function DataGridDemo() {
   const theme = useTheme();
