@@ -23,7 +23,6 @@ const useStyles = makeStyles(theme => ({
   logo: {
     height: '30px',
     width: global.drawerWidth,
-    // marginBottom: theme.spacing(2),
     marginLeft: 0,
   },
   grow: {
@@ -124,11 +123,6 @@ export default function PrimarySearchAppBar(props) {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMenuOpen}
       onClose={handleMenuClose}
-      PaperProps={{
-        style: {
-          background: theme.palette.background.widget,
-        },
-      }}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
@@ -145,15 +139,10 @@ export default function PrimarySearchAppBar(props) {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
-      PaperProps={{
-        style: {
-          background: theme.palette.background.widget,
-        },
-      }}
     >
       <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="secondary">
+          <Badge badgeContent={4} color="error">
             <MailIcon />
           </Badge>
         </IconButton>
@@ -161,7 +150,7 @@ export default function PrimarySearchAppBar(props) {
       </MenuItem>
       <MenuItem>
         <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="secondary">
+          <Badge badgeContent={11} color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -209,12 +198,12 @@ export default function PrimarySearchAppBar(props) {
         </div>
         <div className={classes.grow} />
         <div className={classes.sectionDesktop}>
-          <IconButton aria-label="show 4 new mails" color="secondary">
+          <IconButton aria-label="show 4 new mails">
             <Badge badgeContent={4} color="error">
               <MailIcon />
             </Badge>
           </IconButton>
-          <IconButton aria-label="show 17 new notifications" color="secondary">
+          <IconButton aria-label="show 17 new notifications">
             <Badge badgeContent={17} color="error">
               <NotificationsIcon />
             </Badge>
@@ -225,7 +214,6 @@ export default function PrimarySearchAppBar(props) {
             aria-controls={menuId}
             aria-haspopup="true"
             onClick={handleProfileMenuOpen}
-            color="secondary"
           >
             <AccountCircle />
           </IconButton>
@@ -236,7 +224,6 @@ export default function PrimarySearchAppBar(props) {
             aria-controls={mobileMenuId}
             aria-haspopup="true"
             onClick={handleMobileMenuOpen}
-            color="secondary"
           >
             <MoreIcon />
           </IconButton>

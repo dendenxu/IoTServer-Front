@@ -19,17 +19,22 @@ const theme = createMuiTheme({
     },
     background: {
       default: '#111',
+      paper: '#222',
       widget: '#222',
       button: '#333',
     },
     light: {
       main: '#eee',
-      dark: '#ccc',
+      dark: '#ddd',
     },
     text: {
       primary: '#fff',
       secondary: '#ddd',
       dark: '#111',
+    },
+    action: {
+      hover: '#333',
+      active: '#ddd',
     },
   },
   status: {

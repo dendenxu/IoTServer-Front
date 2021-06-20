@@ -18,17 +18,16 @@ import IconButton from '@material-ui/core/IconButton';
 const useStyles = makeStyles(theme => ({
   drawerPaper: {
     width: global.drawerWidth,
-    background: theme.palette.background.widget,
   },
   drawerContainer: {
     overflow: 'auto',
   },
   icon: {
-    color: theme.palette.secondary.main,
     margin: theme.spacing(1.5),
   },
   item: {
     background: theme.palette.background.button,
+    color: theme.palette.light.dark,
     justifyContent: 'left',
     alignItems: 'center',
     borderRadius: '10px',

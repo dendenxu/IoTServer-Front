@@ -22,11 +22,12 @@ import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
 import SearchAppBar from '../components/SearchAppBar';
 import SectionDrawer from '../components/SectionDrawer';
+import DeviceTable from '../components/DeviceTable';
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
-  grow: {
+  growWidth: {
     display: 'flex',
     flexGrow: 1,
   },
@@ -39,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(1),
   },
 }));
 
@@ -52,14 +53,21 @@ function Home(props) {
   const location = useLocation();
 
   return (
-    <div className={classes.grow}>
+    <div className={classes.growWidth}>
       <CssBaseline />
       <SearchAppBar position="fixed" className={classes.appBar} />
       <SectionDrawer className={classes.drawer} />
-      <main>
+      <div
+        style={{
+          width: '100%',
+        }}
+      >
         <Toolbar />
-        <Typography variant="h1">Hello, world.</Typography>
-      </main>
+        <div className={classes.content}>
+          {/* <Typography variant="h1">Hello, world.</Typography> */}
+          <DeviceTable />
+        </div>
+      </div>
     </div>
   );
 }
