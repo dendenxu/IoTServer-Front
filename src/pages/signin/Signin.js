@@ -182,8 +182,10 @@ function Signin(props) {
           pathname: '/home',
           state: { email: validEmail },
         });
+        return true;
       } else {
         setPasswordInvalid(true);
+        return false;
       }
     };
 
@@ -198,13 +200,16 @@ function Signin(props) {
           await checkEmailWithServer();
         }
       } else {
-        await checkPasswordWithServer();
+        const ok = await checkPasswordWithServer();
+        console.log('Password is OK, returning');
+        if (ok) {
+          return;
+        }
       }
     } catch (err) {
       console.log(err);
-    } finally {
-      setLoadingData(false);
     }
+    setLoadingData(false);
   };
 
   const handleCheckBoxChange = event => {

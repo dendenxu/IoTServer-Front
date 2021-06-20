@@ -51,7 +51,6 @@ const useStyles = makeStyles(theme => ({
 
 const renderBold = params => {
   const theme = useTheme();
-  console.log(params);
   return (
     <Typography
       style={{
@@ -104,9 +103,17 @@ const columns = [
     // resizable: true,
   },
   {
+    field: 'createdDate',
+    headerName: 'Created At',
+    width: 170,
+    editable: false,
+    type: 'dateTime',
+  },
+
+  {
     field: 'value',
-    headerName: 'Last Value',
-    width: 150,
+    headerName: 'Value',
+    width: 120,
     editable: false,
     // resizable: true,
   },
@@ -116,17 +123,15 @@ const columns = [
     width: 130,
     editable: false,
     sortable: true,
-    valueGetter: params =>
-      params.getValue(params.id, 'alert') ? 'ALERT' : 'NORMAL',
+    valueGetter: params => (params.row.alert ? 'ALERT' : 'NORMAL'),
     renderCell: params => {
       const theme = useTheme();
-      console.log(params);
       return (
         <Typography
           style={{
             fontSize: '1.1rem',
             fontWeight: 'bold',
-            color: params.getValue(params.id, 'alert')
+            color: params.row.alert
               ? theme.palette.error.main
               : theme.palette.info.main,
           }}
@@ -137,6 +142,13 @@ const columns = [
     },
     // resizable: true,
   },
+  {
+    field: 'statusUpdateDate',
+    headerName: 'Status Update',
+    width: 180,
+    editable: false,
+    type: 'dateTime',
+  },
 ];
 
 const rows = [
@@ -145,6 +157,8 @@ const rows = [
     name: 'Jon',
     desc: 'This is a strange device',
     type: ['Bot'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 250,
     alert: 0,
   },
@@ -153,6 +167,8 @@ const rows = [
     name: 'Cersei',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
   },
@@ -161,6 +177,8 @@ const rows = [
     name: 'Jaime',
     desc: 'This is a strange device',
     type: ['Drone'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
   },
@@ -169,6 +187,8 @@ const rows = [
     name: 'Arya',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 100,
     alert: 0,
   },
@@ -177,6 +197,8 @@ const rows = [
     name: 'Daenerys',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     alert: 0,
   },
   {
@@ -184,6 +206,8 @@ const rows = [
     name: "I've got no name",
     desc: 'This is a strange device',
     type: ['Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 50,
   },
   {
@@ -191,6 +215,8 @@ const rows = [
     name: 'Ferrara',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
   },
@@ -199,6 +225,8 @@ const rows = [
     name: 'Rossini',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 50,
     alert: 1,
   },
@@ -207,6 +235,8 @@ const rows = [
     name: 'Harvey',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
     value: 50,
     alert: 0,
   },
@@ -232,8 +262,12 @@ export default function DataGridDemo() {
         autoHeight
         autoPageSize
         getRowClassName={params =>
-          params.getValue(params.id, 'alert') ? classes.error : classes.normal
+          params.row.alert ? classes.error : classes.normal
         }
+        onEditCellChangeCommitted={params => {
+          console.log('This edit has been committed');
+          console.log(params);
+        }}
       />
     </div>
   );

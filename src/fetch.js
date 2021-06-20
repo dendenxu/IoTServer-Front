@@ -12,7 +12,7 @@ export default function decorateFetch(origin) {
   const baseUrl = `${protocol}//${origin}`;
   global.fetch = (url, options) => {
     const finalUrl = baseUrl + url;
-    const finalOptions = options; // getting a reference
+    const finalOptions = options || {}; // getting a reference
     finalOptions.credentials = 'include';
     console.log(`Apply base url: ${url}, result: ${finalUrl}`);
     console.log(`Modifying credentials to: include`);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -51,6 +51,57 @@ function Home(props) {
   const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
+  const [countDown, setCountDown] = useState(5);
+  const [email, setEmail] = useState(location.state && location.state.email);
+  const [updated, setUpdated] = useState(false);
+
+  useEffect(async () => {
+    if (!email) {
+      const response = await fetch('/api/account/auth');
+      if (response.ok) {
+        const body = await response.json();
+        setEmail(body.email); // update email
+      }
+      setUpdated(true);
+    }
+  }, []); // no dependency
+
+  useEffect(async () => {
+    let timer = null;
+    if (!email) {
+      timer = setTimeout(() => {
+        console.log(`Counting down from ${countDown}`);
+        if (!countDown) {
+          history.push('/signin');
+          return;
+        }
+        setCountDown(countDown - 1);
+      }, 1000);
+    }
+    return () => {
+      clearInterval(timer);
+    };
+  }, [countDown, email]); // depends on countDown and email
+
+  if (updated && !email) {
+    return (
+      <div>
+        <CssBaseline />
+        <Typography variant="h2">Access Denied, login first</Typography>
+        <Typography variant="h4">
+          You will be redirected to{' '}
+          <span
+            style={{
+              fontFamily: ['Cascadia Code', 'monospace'],
+            }}
+          >
+            /signin
+          </span>{' '}
+          in {countDown} seconds...
+        </Typography>
+      </div>
+    );
+  }
 
   return (
     <div className={classes.growWidth}>
@@ -64,7 +115,6 @@ function Home(props) {
       >
         <Toolbar />
         <div className={classes.content}>
-          {/* <Typography variant="h1">Hello, world.</Typography> */}
           <DeviceTable />
         </div>
       </div>
