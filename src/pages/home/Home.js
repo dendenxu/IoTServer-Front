@@ -20,9 +20,9 @@ import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
-import SearchAppBar from '../components/SearchAppBar';
-import SectionDrawer from '../components/SectionDrawer';
-import DeviceTable from '../components/DeviceTable';
+import SearchAppBar from './SearchAppBar';
+import SectionDrawer from './SectionDrawer';
+import DeviceTable from './DeviceTable';
 
 const useStyles = makeStyles(theme => ({
   growWidth: {
@@ -132,7 +132,7 @@ function Home(props) {
         <SectionDrawer />
         <div className={classes.content}>
           <Toolbar />
-          <DeviceTable />
+          <DeviceTable email={email} />
         </div>
       </div>
     </div>
