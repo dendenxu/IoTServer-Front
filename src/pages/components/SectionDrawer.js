@@ -16,11 +16,23 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles(theme => ({
-  drawerPaper: {
+  drawer: {
+    // position: 'absolute',
+    top: 0,
+    // bottom: 0,
+    left: 0,
+    // flexGrow: 1,
+    // flexDirection: 'column',
+    height: '100vh',
     width: global.drawerWidth,
+    zIndex: 1200,
+    backgroundColor: theme.palette.background.paper,
+  },
+  drawerPaper: {
+    // width: global.drawerWidth,
   },
   drawerContainer: {
-    overflow: 'auto',
+    overflow: 'scroll',
   },
   icon: {
     margin: theme.spacing(1.5),
@@ -75,13 +87,19 @@ export default function SectionDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
 
+  const { style, className, ...other } = props;
+
   return (
-    <Drawer
-      {...props}
+    <div
       variant="permanent"
+      className={`${classes.drawer} ${className}`}
+      style={{
+        ...style,
+      }}
       classes={{
         paper: classes.drawerPaper,
       }}
+      {...other}
     >
       <Toolbar />
       <div className={classes.drawerContainer}>
@@ -101,6 +119,6 @@ export default function SectionDrawer(props) {
           ))}
         </List>
       </div>
-    </Drawer>
+    </div>
   );
 }

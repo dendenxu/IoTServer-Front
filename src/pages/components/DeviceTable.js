@@ -460,7 +460,7 @@ export default function DeviceDataGrid() {
           marginLeft: 16,
         }}
         onClick={() => {
-          const newId = data.length;
+          const newId = data.length + 1;
           const newData = [
             ...data,
             {
@@ -494,7 +494,7 @@ export default function DeviceDataGrid() {
             const pushData = (prev, next) => {
               for (let j = prev; j < next; j++) {
                 const newItem = data[j];
-                newItem.id = newData.length;
+                newItem.id = newData.length + 1;
                 newData.push(data[j]);
               }
             };

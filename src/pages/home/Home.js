@@ -24,23 +24,24 @@ import SearchAppBar from '../components/SearchAppBar';
 import SectionDrawer from '../components/SectionDrawer';
 import DeviceTable from '../components/DeviceTable';
 
-const drawerWidth = 240;
-
 const useStyles = makeStyles(theme => ({
   growWidth: {
     display: 'flex',
+    flexDirection: 'column',
     flexGrow: 1,
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
+    flexShrink: 1,
   },
   content: {
     flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
     padding: theme.spacing(1),
+    overflow: 'auto',
+    maxHeight: '100vh',
+    border: 'none',
   },
 }));
 
@@ -116,7 +117,6 @@ function Home(props) {
       </div>
     );
   }
-
   return (
     <div
       className={classes.growWidth}
@@ -124,14 +124,14 @@ function Home(props) {
     >
       <CssBaseline />
       <SearchAppBar position="fixed" className={classes.appBar} />
-      <SectionDrawer className={classes.drawer} />
       <div
         style={{
-          width: '100%',
+          display: 'flex',
         }}
       >
-        <Toolbar />
+        <SectionDrawer />
         <div className={classes.content}>
+          <Toolbar />
           <DeviceTable />
         </div>
       </div>
