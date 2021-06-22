@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => {
       fontWeight: '500',
       borderRadius: '32px',
       margin: theme.spacing(3),
-      padding: theme.spacing(2, 3),
+      padding: theme.spacing(2, 3, 4),
       background: theme.palette.background.widget,
       '& .MuiDataGrid-root': {
         border: 'none',
@@ -46,14 +46,9 @@ const useStyles = makeStyles(theme => {
       '& .MuiDataGrid-editCellInputBase': {
         fontSize: '1.0rem',
       },
-
-      // '& .MuiDataGrid-row': {
-      //   // borderRadius: '10px',
-      // },
     },
 
     normal: {
-      // background: theme.palette.background.transparent,
       background: 'transparent',
     },
     error: {
@@ -116,9 +111,16 @@ const TableButton = props => {
   );
 };
 
+const handleSave = row => {
+  row.modified = false;
+  return row;
+};
+
+const checkSave = row => row.modified;
+
 const renderSave = params => {
   const theme = useTheme();
-  const disabled = !params.row.modified;
+  const disabled = !checkSave(params.row);
 
   return (
     <TableButton
@@ -130,7 +132,7 @@ const renderSave = params => {
         const newValue = params.row;
         console.log('Clicking new value:');
         console.log(newValue);
-        params.row.modified = false;
+        handleSave(newValue);
       }}
     >
       Save
@@ -138,14 +140,24 @@ const renderSave = params => {
   );
 };
 
+const handleCreate = row => {
+  row.new = false;
+  return row;
+};
+
+const checkCreate = row => row.id && row.name && row.type && row.desc;
+
+const handleRowAction = row => {
+  if (row.new && checkCreate(row)) {
+    handleCreate(row);
+  } else if (row.modified && checkSave(row)) {
+    handleSave(row);
+  }
+};
+
 const renderCreate = params => {
   const theme = useTheme();
-  const disabled = !(
-    params.row.id &&
-    params.row.name &&
-    params.row.type &&
-    params.row.desc
-  );
+  const disabled = !checkCreate(params.row);
 
   return (
     <TableButton
@@ -157,7 +169,7 @@ const renderCreate = params => {
         const newValue = params.row;
         console.log('Clicking new value:');
         console.log(newValue);
-        params.row.new = false;
+        handleCreate(params.row);
       }}
     >
       Create
@@ -295,9 +307,32 @@ const columns = [
     editable: false,
     type: 'dateTime',
   },
+  {
+    field: 'new',
+    headerName: 'New',
+    flex: 0.08,
+  },
+  {
+    field: 'modified',
+    headerName: 'Modified',
+    flex: 0.08,
+  },
 ];
 
 const rows = [
+  {
+    id: 0,
+    mqttId: 'device-#0',
+    name: 'First Device',
+    desc: 'This is a strange device',
+    type: ['Bot'],
+    createdDate: new Date(),
+    statusUpdateDate: new Date(),
+    value: 250,
+    alert: 0,
+    new: false,
+    modified: true,
+  },
   {
     id: 1,
     mqttId: 'device-#1',
@@ -460,8 +495,8 @@ export default function DeviceDataGrid() {
           marginLeft: 16,
         }}
         onClick={() => {
-          const newId = data.length + 1;
-          const newData = [
+          const newId = data.length;
+          setData([
             ...data,
             {
               id: newId,
@@ -469,58 +504,72 @@ export default function DeviceDataGrid() {
               new: true,
               modified: false,
             },
-          ];
-          setData(newData);
+          ]);
         }}
       >
         Add Device
       </IoTButton>
       {selection.length !== 0 && (
-        <IoTButton
-          style={{
-            marginLeft: 16,
-            backgroundColor: theme.palette.error.main,
-          }}
-          typographyProps={{
-            style: {
-              color: theme.palette.text.dark,
-            },
-          }}
-          onClick={() => {
-            console.log('Trying to delete: ');
-            console.log(selection);
-            const newData = [];
+        <>
+          <IoTButton
+            style={{
+              marginLeft: 16,
+              backgroundColor: theme.palette.warning.main,
+            }}
+            onClick={() => {
+              // ! bad approach?
+              selection.forEach(i => {
+                const row = data[i];
+                handleRowAction(row);
+              });
+              setSelection([]);
+            }}
+          >
+            Perform Action
+          </IoTButton>
+          <IoTButton
+            style={{
+              marginLeft: 16,
+              backgroundColor: theme.palette.error.main,
+            }}
+            onClick={() => {
+              console.log('Trying to delete: ');
+              console.log(selection);
+              const newData = [];
 
-            const pushData = (prev, next) => {
-              for (let j = prev; j < next; j++) {
-                const newItem = data[j];
-                newItem.id = newData.length + 1;
-                newData.push(data[j]);
+              const pushData = (prev, next) => {
+                for (let j = prev; j < next; j++) {
+                  const newItem = data[j];
+                  newItem.id = newData.length;
+                  newData.push(data[j]);
+                }
+              };
+
+              let prev = 0;
+              let next = 0;
+              for (let i = 0; i < selection.length; i++) {
+                next = selection[i]; // selection model starts at 1
+                pushData(prev, next);
+                prev = next + 1;
               }
-            };
-
-            let prev = 0;
-            let next = 0;
-            for (let i = 0; i < selection.length; i++) {
-              next = selection[i] - 1; // selection model starts at 1
+              next = data.length;
+              console.log(`Current prev: ${prev}`);
+              console.log(`Current newData: `);
+              console.log(newData);
               pushData(prev, next);
-              prev = next + 1;
-            }
-            next = data.length;
-            console.log(`Current prev: ${prev}`);
-            console.log(`Current newData: `);
-            console.log(newData);
-            pushData(prev, next);
 
-            setData(newData);
-            setSelection([]);
+              setData(newData);
+              setSelection([]);
 
-            console.log('Getting newData');
-            console.log(newData);
-          }}
-        >
-          Delete Selected
-        </IoTButton>
+              console.log('Getting newData');
+              console.log(newData);
+
+              // what if?
+            }}
+          >
+            Delete Selected
+          </IoTButton>
+        </>
       )}
     </div>
   );
