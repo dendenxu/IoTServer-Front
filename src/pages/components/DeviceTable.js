@@ -47,9 +47,9 @@ const useStyles = makeStyles(theme => {
         fontSize: '1.0rem',
       },
 
-      '& .MuiDataGrid-row': {
-        // borderRadius: '10px',
-      },
+      // '& .MuiDataGrid-row': {
+      //   // borderRadius: '10px',
+      // },
     },
 
     normal: {
@@ -88,20 +88,33 @@ const renderBold = params => {
   );
 };
 
-const TableButton = props => (
-  <IoTButton
-    fullWidth
-    typographyProps={{
-      style: {
-        fontSize: '0.8rem',
-        fontWeight: 'bold',
-      },
-    }}
-    {...props}
-  >
-    {props.children}
-  </IoTButton>
-);
+const TableButton = props => {
+  const {
+    disabled,
+    style: { background, ...otherStyle },
+    ...other
+  } = props;
+
+  return (
+    <IoTButton
+      disabled={disabled}
+      style={{
+        ...otherStyle,
+        background: disabled ? fade(background, 0.5) : background,
+      }}
+      fullWidth
+      typographyProps={{
+        style: {
+          fontSize: '0.8rem',
+          fontWeight: 'bold',
+        },
+      }}
+      {...other}
+    >
+      {props.children}
+    </IoTButton>
+  );
+};
 
 const renderSave = params => {
   const theme = useTheme();
@@ -163,6 +176,7 @@ const columns = [
     width: 80,
     editable: false,
     sortable: false,
+    filterable: false,
     renderCell: params => {
       if (params.row.new) {
         return renderCreate(params);
@@ -176,8 +190,9 @@ const columns = [
     field: 'id',
     headerName: 'Index',
     flex: 0.06,
-
+    sortable: false,
     editable: false,
+    filterable: false,
     // resizable: true,
 
     // type: 'number',
@@ -445,7 +460,7 @@ export default function DeviceDataGrid() {
           marginLeft: 16,
         }}
         onClick={() => {
-          const newId = data[data.length - 1].id + 1;
+          const newId = data.length;
           const newData = [
             ...data,
             {
