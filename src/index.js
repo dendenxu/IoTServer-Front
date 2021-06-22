@@ -2,7 +2,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ThemeProvider } from '@material-ui/core/styles';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import Server from './mock';
 import theme from './theme/theme';
 import App from './App';
@@ -26,11 +25,7 @@ if (origin) {
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-    <Router>
-      <Switch>
-        <Route path="/" component={App} />
-      </Switch>
-    </Router>
+    <App />
   </ThemeProvider>,
   document.getElementById('root'),
 );

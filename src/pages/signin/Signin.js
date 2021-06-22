@@ -183,8 +183,10 @@ function Signin(props) {
           pathname: '/home',
           state: { email: validEmail },
         });
+        return true;
       } else {
         setPasswordInvalid(true);
+        return false;
       }
     };
 
@@ -200,11 +202,12 @@ function Signin(props) {
           setLoadingData(false);
         }
       } else {
-        await checkPasswordWithServer();
+        if (await checkPasswordWithServer()) return;
       }
     } catch (err) {
       console.log(err);
     }
+    setLoadingData(false);
   };
 
   const handleCheckBoxChange = event => {
@@ -258,7 +261,16 @@ function Signin(props) {
 
         <Box style={{ height: '100%', width: '100%', position: 'relative' }}>
           {loadingData && (
-            <Box position="absolute" top="5%" left="44%">
+            <Box
+              position="absolute"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                paddingTop: '10%',
+              }}
+            >
               <CircularProgress size={68} className={classes.loadingProgress} />
             </Box>
           )}

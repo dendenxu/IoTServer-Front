@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+/* eslint-disable arrow-body-style */
 /* eslint-disable no-return-await */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-param-reassign */
@@ -5,17 +7,30 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import InputBase from '@material-ui/core/InputBase';
+import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
+import Checkbox from '@material-ui/core/Checkbox';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { DataGrid, GridToolbar } from '@material-ui/data-grid';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import Chip from '@material-ui/core/Chip';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
 
 const useStyles = makeStyles(theme => {
   const noOutline = {
     outline: 'none',
+    border: 'none',
+
     background: fade(theme.palette.primary.main, 0.1),
+  };
+
+  const full = {
+    width: '100%',
+    height: '100%',
   };
 
   return {
@@ -27,12 +42,17 @@ const useStyles = makeStyles(theme => {
     },
 
     table: {
-      fontSize: '1rem',
-      fontWeight: '500',
       borderRadius: '32px',
       margin: theme.spacing(3),
       padding: theme.spacing(2, 3, 4),
       background: theme.palette.background.widget,
+    },
+
+    datagrid: {
+      fontSize: '1.1rem',
+      fontWeight: '500',
+      border: 'none',
+
       '& .MuiDataGrid-root': {
         border: 'none',
         borderRadius: '16px',
@@ -53,8 +73,8 @@ const useStyles = makeStyles(theme => {
       },
       '& .MuiDataGrid-cell:focus-within': noOutline,
       '& .MuiDataGrid-columnHeader:focus-within': noOutline,
-      '& .MuiDataGrid-editCellInputBase': {
-        fontSize: '1.0rem',
+      '& .MuiDataGrid-editInputCell': {
+        fontSize: '1.1rem',
       },
     },
 
@@ -74,6 +94,16 @@ const useStyles = makeStyles(theme => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+    },
+
+    input: {
+      ...full,
+      '& .MuiAutoComplete-root': full,
+      '& .MuiFormControl-root': full,
+      '& .MuiInputBase-root': {
+        ...full,
+        paddingTop: 0,
+      },
     },
   };
 });
@@ -114,6 +144,109 @@ export default function DeviceDataGrid(props) {
   const [selection, setSelection] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [editRowsModel, setEditRowsModel] = useState({});
+
+  const handleEditRowModelChange = React.useCallback(params => {
+    setEditRowsModel(params.model);
+  }, []);
+
+  const options = ['Car', 'Bot', 'Drone', 'Monitor'];
+
+  const renderTags = value => {
+    // console.log('Rendering tags: ');
+    // console.log(value);
+    if (!value) {
+      value = [];
+    }
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          fontWeight: 'bold',
+        }}
+      >
+        {value.map((option, index) => (
+          <Chip
+            variant="outlined"
+            key={option}
+            style={{
+              // borderColor: theme.palette.primary.main,
+              // borderWidth: 1,
+              background: fade(theme.palette.background.widget, 0.2),
+              color: theme.palette.text.secondary,
+              marginRight: theme.spacing(1),
+            }}
+            label={option}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const renderTagsEdit = params => {
+    const { id, field, value, api, row } = params;
+    console.log(params);
+    return (
+      <Autocomplete
+        className={classes.input}
+        multiple
+        options={options}
+        value={value}
+        autoFocus
+        autoComplete
+        freeSolo
+        autoSelect
+        disableClearable
+        onKeyDown={event => {
+          console.log('Key down');
+          if (event.key === 'Backspace') {
+            console.log('Stopped');
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+          }
+          return true;
+        }}
+        onChange={(event, newValue) => {
+          console.log('Commiting changes');
+          const editProps = {
+            value: newValue,
+          };
+
+          // console.log(editProps);
+
+          // api.setCellValue(id, field, value, editProps);
+          api.commitCellChange({ id, field, props: editProps });
+          api.setCellMode(id, field, 'view');
+
+          console.log(api.setCellValue);
+
+          row.type = newValue;
+          const newData = [
+            ...data.slice(0, id),
+            {
+              ...data[id],
+              type: newValue,
+            },
+            ...data.slice(id + 1, data.length),
+          ];
+          console.log(newData);
+          setData(newData);
+        }}
+        renderTags={(value, getTagProps) => renderTags(value)}
+        renderInput={params => (
+          <TextField
+            {...params}
+            InputProps={{ ...params.InputProps, disableUnderline: true }}
+            variant="filled"
+            placeholder="Favorites"
+          />
+        )}
+      />
+    );
+  };
 
   const renderBold = params => (
     <Typography
@@ -157,7 +290,7 @@ export default function DeviceDataGrid(props) {
       console.log('Payload:');
       console.log(device);
 
-      const res = await fetch('/api/device/create', {
+      const res = await fetch(`/api/device/create?email=${email}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,9 +321,6 @@ export default function DeviceDataGrid(props) {
         name: row.name,
         desc: row.desc,
         type: row.type,
-        user: {
-          email,
-        },
       });
       return result;
     } catch (err) {
@@ -199,7 +329,7 @@ export default function DeviceDataGrid(props) {
     return false;
   };
 
-  const checkCreate = row => row.id && row.name && row.type && row.desc;
+  const checkCreate = row => row.mqttId && row.name && row.type && row.desc;
 
   const handleRowAction = async row => {
     if (row.new && checkCreate(row)) {
@@ -278,7 +408,6 @@ export default function DeviceDataGrid(props) {
       field: 'name',
       headerName: 'Name',
       flex: 0.083,
-
       editable: true,
       renderCell: renderBold,
     },
@@ -286,15 +415,17 @@ export default function DeviceDataGrid(props) {
       field: 'desc',
       headerName: 'Description',
       flex: 0.12,
-
       editable: true,
     },
     {
       field: 'type',
       headerName: 'Device Type',
-      flex: 0.1,
-
+      flex: 0.13,
       editable: true,
+      // type: 'array',
+      // valueFormatter: params => params.row.type.join(', '),
+      renderCell: params => renderTags(params.row.type),
+      renderEditCell: renderTagsEdit,
     },
     {
       field: 'createdDate',
@@ -378,6 +509,7 @@ export default function DeviceDataGrid(props) {
       </Popover>
 
       <DataGrid
+        className={classes.datagrid}
         rows={data}
         columns={columns}
         // pageSize={6}
@@ -398,6 +530,12 @@ export default function DeviceDataGrid(props) {
             return classes.normal;
           }
         }}
+        onEditCellChange={params => {
+          console.log('This edit happens');
+          console.log(params);
+          console.log('Is the const: rows, changed?');
+          console.log(tempData === data);
+        }}
         onEditCellChangeCommitted={params => {
           console.log('This edit has been committed');
           console.log(params);
@@ -413,6 +551,8 @@ export default function DeviceDataGrid(props) {
         components={{
           Toolbar: GridToolbar,
         }}
+        // editRowsModel={editRowsModel}
+        // onEditRowModelChange={handleEditRowModelChange}
       />
       <IoTButton
         style={{
