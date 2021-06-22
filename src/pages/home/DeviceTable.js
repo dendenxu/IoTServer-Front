@@ -193,21 +193,15 @@ export default function DeviceDataGrid(props) {
         className={classes.input}
         multiple
         options={options}
-        value={value}
-        autoFocus
-        autoComplete
-        freeSolo
+        value={value || []}
         autoSelect
         disableClearable
         onKeyDown={event => {
           console.log('Key down');
           if (event.key === 'Backspace') {
             console.log('Stopped');
-            event.preventDefault();
             event.stopPropagation();
-            return false;
           }
-          return true;
         }}
         onChange={(event, newValue) => {
           console.log('Commiting changes');
@@ -215,30 +209,19 @@ export default function DeviceDataGrid(props) {
             value: newValue,
           };
 
-          // console.log(editProps);
-
-          // api.setCellValue(id, field, value, editProps);
-          api.commitCellChange({ id, field, props: editProps });
+          console.log(newValue);
+          // data[id][field] = newValue;
+          // row[field] = newValue;
+          api.setCellValue({ id, field, value: newValue });
+          // api.commitCellChange({ id, field, props: editProps });
           api.setCellMode(id, field, 'view');
-
-          console.log(api.setCellValue);
-
-          row.type = newValue;
-          const newData = [
-            ...data.slice(0, id),
-            {
-              ...data[id],
-              type: newValue,
-            },
-            ...data.slice(id + 1, data.length),
-          ];
-          console.log(newData);
-          setData(newData);
+          // api.setCellMode(id, field, 'edit');
         }}
         renderTags={(value, getTagProps) => renderTags(value)}
         renderInput={params => (
           <TextField
             {...params}
+            autoFocus
             InputProps={{ ...params.InputProps, disableUnderline: true }}
             variant="filled"
             placeholder="Favorites"
@@ -329,7 +312,8 @@ export default function DeviceDataGrid(props) {
     return false;
   };
 
-  const checkCreate = row => row.mqttId && row.name && row.type && row.desc;
+  const checkCreate = row =>
+    row.mqttId && row.name && row.type && row.type.length !== 0 && row.desc;
 
   const handleRowAction = async row => {
     if (row.new && checkCreate(row)) {
@@ -541,6 +525,13 @@ export default function DeviceDataGrid(props) {
           console.log(params);
           console.log('Is the const: rows, changed?');
           console.log(tempData === data);
+          const { id, field, props } = params;
+
+          data[id][field] = props.value;
+
+          console.log(data);
+          // setData(state => [...state, ...data]);
+          setData(data);
         }}
         selectionModel={selection}
         onSelectionModelChange={newSelection => {
