@@ -178,14 +178,13 @@ function Signin(props) {
 
       if (response.ok) {
         setPasswordInvalid(false);
+        console.log('Password is OK, returning');
         history.push({
           pathname: '/home',
           state: { email: validEmail },
         });
-        return true;
       } else {
         setPasswordInvalid(true);
-        return false;
       }
     };
 
@@ -198,18 +197,14 @@ function Signin(props) {
           console.log('Wrong email format, refusing to login');
         } else {
           await checkEmailWithServer();
+          setLoadingData(false);
         }
       } else {
-        const ok = await checkPasswordWithServer();
-        console.log('Password is OK, returning');
-        if (ok) {
-          return;
-        }
+        await checkPasswordWithServer();
       }
     } catch (err) {
       console.log(err);
     }
-    setLoadingData(false);
   };
 
   const handleCheckBoxChange = event => {

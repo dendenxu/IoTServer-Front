@@ -1,53 +1,77 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-param-reassign */
 /* eslint-disable react/display-name */
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import InputBase from '@material-ui/core/InputBase';
 import Typography from '@material-ui/core/Typography';
-import { DataGrid } from '@material-ui/data-grid';
+import { DataGrid, GridToolbar } from '@material-ui/data-grid';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
+import IoTButton from './IoTButton';
 
-const useStyles = makeStyles(theme => ({
-  table: {
-    fontSize: '1rem',
-    fontWeight: '500',
-    margin: theme.spacing(3),
-    border: 'none',
-    background: theme.palette.background.widget,
-    '& .MuiDataGrid-columnSeparator': {
-      color: theme.palette.primary.main,
-    },
-    color: theme.palette.text.secondary,
-    '& .MuiDataGrid-columnsContainer': {
-      border: 'none',
-      color: theme.palette.text.primary,
-      fontSize: '1.4rem',
-      fontWeight: 'normal',
-      fontFamily: 'Teko',
-    },
-    '& .MuiDataGrid-cell': {
-      border: 'none',
-    },
-    '& .MuiDataGrid-cell:focus': {
-      outline: 'none',
-      background: fade(theme.palette.primary.main, 0.1),
-    },
-    '& .MuiDataGrid-editCellInputBase': {
-      fontSize: '1.0rem',
-    },
-  },
+const useStyles = makeStyles(theme => {
+  const noOutline = {
+    outline: 'none',
+    background: fade(theme.palette.primary.main, 0.1),
+  };
 
-  normal: {
-    background: '#0000',
-  },
-  error: {
-    background: fade(theme.palette.error.main, 0.1),
-  },
-  flex: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-}));
+  return {
+    table: {
+      fontSize: '1rem',
+      fontWeight: '500',
+      borderRadius: '32px',
+      margin: theme.spacing(3),
+      padding: theme.spacing(2, 3),
+      background: theme.palette.background.widget,
+      '& .MuiDataGrid-root': {
+        border: 'none',
+        borderRadius: '16px',
+      },
+      '& .MuiDataGrid-columnSeparator': {
+        color: theme.palette.primary.main,
+      },
+      color: theme.palette.text.secondary,
+      '& .MuiDataGrid-columnsContainer': {
+        border: 'none',
+        color: theme.palette.text.primary,
+        fontSize: '1.4rem',
+        fontWeight: 'normal',
+        fontFamily: 'Teko',
+      },
+      '& .MuiDataGrid-cell': {
+        border: 'none',
+      },
+      '& .MuiDataGrid-cell:focus-within': noOutline,
+      '& .MuiDataGrid-columnHeader:focus-within': noOutline,
+      '& .MuiDataGrid-editCellInputBase': {
+        fontSize: '1.0rem',
+      },
+
+      '& .MuiDataGrid-row': {
+        // borderRadius: '10px',
+      },
+    },
+
+    normal: {
+      // background: theme.palette.background.transparent,
+      background: 'transparent',
+    },
+    error: {
+      background: `${fade(theme.palette.error.main, 0.1)} !important`,
+    },
+    new: {
+      background: `${fade(theme.palette.warning.main, 0.5)} !important`,
+    },
+    modified: {
+      background: `${fade(theme.palette.primary.main, 0.5)} !important`,
+    },
+    flex: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  };
+});
 
 const renderBold = params => {
   const theme = useTheme();
@@ -64,13 +88,108 @@ const renderBold = params => {
   );
 };
 
+const TableButton = props => (
+  <IoTButton
+    fullWidth
+    typographyProps={{
+      style: {
+        fontSize: '0.8rem',
+        fontWeight: 'bold',
+      },
+    }}
+    {...props}
+  >
+    {props.children}
+  </IoTButton>
+);
+
+const renderSave = params => {
+  const theme = useTheme();
+  const disabled = !params.row.modified;
+
+  return (
+    <TableButton
+      disabled={disabled}
+      style={{
+        background: theme.palette.primary.main,
+      }}
+      onClick={() => {
+        const newValue = params.row;
+        console.log('Clicking new value:');
+        console.log(newValue);
+        params.row.modified = false;
+      }}
+    >
+      Save
+    </TableButton>
+  );
+};
+
+const renderCreate = params => {
+  const theme = useTheme();
+  const disabled = !(
+    params.row.id &&
+    params.row.name &&
+    params.row.type &&
+    params.row.desc
+  );
+
+  return (
+    <TableButton
+      style={{
+        background: theme.palette.warning.main,
+      }}
+      disabled={disabled}
+      onClick={() => {
+        const newValue = params.row;
+        console.log('Clicking new value:');
+        console.log(newValue);
+        params.row.new = false;
+      }}
+    >
+      Create
+    </TableButton>
+  );
+};
+
 const columns = [
   {
+    disableColumnMenu: true,
+    align: 'center',
+    headerAlign: 'center',
+    field: 'action',
+    headerName: 'Action',
+    // flex: 0.058,
+    width: 80,
+    editable: false,
+    sortable: false,
+    renderCell: params => {
+      if (params.row.new) {
+        return renderCreate(params);
+      } else {
+        return renderSave(params);
+      }
+    },
+  },
+  {
+    hide: true,
     field: 'id',
-    headerName: 'MqttId',
-    width: 125,
-    editable: true,
+    headerName: 'Index',
+    flex: 0.06,
+
+    editable: false,
     // resizable: true,
+
+    // type: 'number',
+    // valueGetter: params => `${params.getValue(params.id, 'mqttId') || ''}`,
+    renderCell: renderBold,
+  },
+  {
+    field: 'mqttId',
+    headerName: 'MqttId',
+    flex: 0.08,
+
+    editable: true,
 
     // type: 'number',
     // valueGetter: params => `${params.getValue(params.id, 'mqttId') || ''}`,
@@ -79,7 +198,8 @@ const columns = [
   {
     field: 'name',
     headerName: 'Name',
-    width: 120,
+    flex: 0.083,
+
     editable: true,
     // resizable: true,
     renderCell: renderBold,
@@ -89,7 +209,8 @@ const columns = [
     headerName: 'Description',
     // type: 'number',
     // width: 160,
-    width: 250,
+    flex: 0.12,
+
     editable: true,
     // resizable: true,
   },
@@ -98,14 +219,16 @@ const columns = [
     headerName: 'Device Type',
     // description: 'This column has a value getter and is not sortable.',
     // sortable: false,
-    width: 165,
+    flex: 0.1,
+
     editable: true,
     // resizable: true,
   },
   {
     field: 'createdDate',
     headerName: 'Created At',
-    width: 170,
+    flex: 0.115,
+
     editable: false,
     type: 'dateTime',
   },
@@ -113,17 +236,24 @@ const columns = [
   {
     field: 'value',
     headerName: 'Value',
-    width: 120,
+    flex: 0.087,
+
     editable: false,
     // resizable: true,
   },
   {
     field: 'status',
     headerName: 'Status',
-    width: 130,
+    flex: 0.087,
+
     editable: false,
     sortable: true,
-    valueGetter: params => (params.row.alert ? 'ALERT' : 'NORMAL'),
+    valueGetter: params =>
+      params.row.alert === undefined
+        ? ''
+        : params.row.alert
+        ? 'ALERT'
+        : 'NORMAL',
     renderCell: params => {
       const theme = useTheme();
       return (
@@ -145,7 +275,8 @@ const columns = [
   {
     field: 'statusUpdateDate',
     headerName: 'Status Update',
-    width: 180,
+    flex: 0.12,
+
     editable: false,
     type: 'dateTime',
   },
@@ -154,6 +285,7 @@ const columns = [
 const rows = [
   {
     id: 1,
+    mqttId: 'device-#1',
     name: 'Jon',
     desc: 'This is a strange device',
     type: ['Bot'],
@@ -161,9 +293,12 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 250,
     alert: 0,
+    new: false,
+    modified: true,
   },
   {
     id: 2,
+    mqttId: 'device-#2',
     name: 'Cersei',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
@@ -171,9 +306,12 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
+    new: false,
+    modified: true,
   },
   {
     id: 3,
+    mqttId: 'device-#3',
     name: 'Jaime',
     desc: 'This is a strange device',
     type: ['Drone'],
@@ -181,9 +319,12 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
+    new: false,
+    modified: true,
   },
   {
     id: 4,
+    mqttId: 'device-#4',
     name: 'Arya',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
@@ -191,27 +332,36 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 100,
     alert: 0,
+    new: false,
+    modified: false,
   },
   {
     id: 5,
+    mqttId: 'device-#5',
     name: 'Daenerys',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
     createdDate: new Date(),
     statusUpdateDate: new Date(),
     alert: 0,
+    new: false,
+    modified: false,
   },
   {
     id: 6,
+    mqttId: 'device-#6',
     name: "I've got no name",
     desc: 'This is a strange device',
     type: ['Car'],
     createdDate: new Date(),
     statusUpdateDate: new Date(),
     value: 50,
+    new: false,
+    modified: false,
   },
   {
     id: 7,
+    mqttId: 'device-#7',
     name: 'Ferrara',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
@@ -219,9 +369,12 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 100,
     alert: 1,
+    new: false,
+    modified: true,
   },
   {
     id: 8,
+    mqttId: 'device-#8',
     name: 'Rossini',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
@@ -229,31 +382,29 @@ const rows = [
     statusUpdateDate: new Date(),
     value: 50,
     alert: 1,
+    new: false,
+    modified: true,
   },
   {
     id: 9,
+    mqttId: 'device-#9',
     name: 'Harvey',
     desc: 'This is a strange device',
     type: ['Bot', 'Car'],
-    createdDate: new Date(),
-    statusUpdateDate: new Date(),
-    value: 50,
-    alert: 0,
+    new: true,
+    modified: false,
   },
 ];
 
-export default function DataGridDemo() {
+export default function DeviceDataGrid() {
   const theme = useTheme();
   const classes = useStyles();
+  const [data, setData] = useState(rows);
+  const [selection, setSelection] = useState([]);
   return (
-    <div
-      style={{
-        width: '100%',
-      }}
-    >
+    <div className={classes.table}>
       <DataGrid
-        className={classes.table}
-        rows={rows}
+        rows={data}
         columns={columns}
         // pageSize={6}
         // disableExtendRowFullWidth
@@ -261,14 +412,101 @@ export default function DataGridDemo() {
         disableSelectionOnClick
         autoHeight
         autoPageSize
-        getRowClassName={params =>
-          params.row.alert ? classes.error : classes.normal
-        }
+        // hideFooterPagination
+        getRowClassName={params => {
+          if (params.row.new) {
+            return classes.new;
+          } else if (params.row.modified) {
+            return classes.modified;
+          } else if (params.row.alert) {
+            return classes.error;
+          } else {
+            return classes.normal;
+          }
+        }}
         onEditCellChangeCommitted={params => {
           console.log('This edit has been committed');
           console.log(params);
+          console.log('Is the const: rows, changed?');
+          console.log(rows === params.rows);
+        }}
+        selectionModel={selection}
+        onSelectionModelChange={newSelection => {
+          console.log('Getting new selection');
+          console.log(newSelection);
+          setSelection(newSelection.selectionModel);
+        }}
+        components={{
+          Toolbar: GridToolbar,
         }}
       />
+      <IoTButton
+        style={{
+          marginLeft: 16,
+        }}
+        onClick={() => {
+          const newId = data[data.length - 1].id + 1;
+          const newData = [
+            ...data,
+            {
+              id: newId,
+              mqttId: `device-#${newId}`,
+              new: true,
+              modified: false,
+            },
+          ];
+          setData(newData);
+        }}
+      >
+        Add Device
+      </IoTButton>
+      {selection.length !== 0 && (
+        <IoTButton
+          style={{
+            marginLeft: 16,
+            backgroundColor: theme.palette.error.main,
+          }}
+          typographyProps={{
+            style: {
+              color: theme.palette.text.dark,
+            },
+          }}
+          onClick={() => {
+            console.log('Trying to delete: ');
+            console.log(selection);
+            const newData = [];
+
+            const pushData = (prev, next) => {
+              for (let j = prev; j < next; j++) {
+                const newItem = data[j];
+                newItem.id = newData.length;
+                newData.push(data[j]);
+              }
+            };
+
+            let prev = 0;
+            let next = 0;
+            for (let i = 0; i < selection.length; i++) {
+              next = selection[i] - 1; // selection model starts at 1
+              pushData(prev, next);
+              prev = next + 1;
+            }
+            next = data.length;
+            console.log(`Current prev: ${prev}`);
+            console.log(`Current newData: `);
+            console.log(newData);
+            pushData(prev, next);
+
+            setData(newData);
+            setSelection([]);
+
+            console.log('Getting newData');
+            console.log(newData);
+          }}
+        >
+          Delete Selected
+        </IoTButton>
+      )}
     </div>
   );
 }

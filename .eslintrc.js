@@ -31,5 +31,6 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'no-irregular-whitespace': 'off',
     'react/destructuring-assignment': 'off',
+    'no-nested-ternary': 'off',
   },
 };

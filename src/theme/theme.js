@@ -22,6 +22,8 @@ const theme = createMuiTheme({
       paper: '#222',
       widget: '#222',
       button: '#333',
+      new: '#888',
+      transparent: '#0000',
     },
     light: {
       main: '#eee',
