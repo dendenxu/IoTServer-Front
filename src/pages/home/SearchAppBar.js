@@ -1,5 +1,6 @@
 import React from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
+import { useHistory } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -14,6 +15,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
 import { ReactComponent as Icon } from '../../assets/images/icon.svg';
 
 const useStyles = makeStyles(theme => ({
@@ -90,6 +93,7 @@ const useStyles = makeStyles(theme => ({
 export default function PrimarySearchAppBar(props) {
   const theme = useTheme();
   const classes = useStyles();
+  const history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -111,6 +115,11 @@ export default function PrimarySearchAppBar(props) {
 
   const handleMobileMenuOpen = event => {
     setMobileMoreAnchorEl(event.currentTarget);
+  };
+
+  const handleLogout = event => {
+    fetch('/api/account/logout');
+    history.push('/signin');
   };
 
   const menuId = 'primary-search-account-menu';
@@ -167,6 +176,18 @@ export default function PrimarySearchAppBar(props) {
         </IconButton>
         <p>Profile</p>
       </MenuItem>
+      <MenuItem onClick={handleLogout}>
+        <IconButton
+          // aria-label="account of current user"
+          // aria-controls="primary-search-account-menu"
+          // aria-haspopup="true"
+          color="inherit"
+        >
+          <ExitToAppIcon />
+        </IconButton>
+
+        <p>Logout</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -209,13 +230,21 @@ export default function PrimarySearchAppBar(props) {
             </Badge>
           </IconButton>
           <IconButton
-            edge="end"
             aria-label="account of current user"
             aria-controls={menuId}
             aria-haspopup="true"
             onClick={handleProfileMenuOpen}
           >
             <AccountCircle />
+          </IconButton>
+          <IconButton
+            edge="end"
+            // aria-label="account of current user"
+            // aria-controls="primary-search-account-menu"
+            // aria-haspopup="true"
+            onClick={handleLogout}
+          >
+            <ExitToAppIcon />
           </IconButton>
         </div>
         <div className={classes.sectionMobile}>

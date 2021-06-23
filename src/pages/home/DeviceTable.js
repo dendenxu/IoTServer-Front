@@ -273,7 +273,7 @@ export default function DeviceDataGrid(props) {
       console.log('Payload:');
       console.log(device);
 
-      const res = await fetch(`/api/device/create?email=${email}`, {
+      const res = await fetch(`/api/device/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -304,6 +304,9 @@ export default function DeviceDataGrid(props) {
         name: row.name,
         desc: row.desc,
         type: row.type,
+        user: {
+          email,
+        },
       });
       return result;
     } catch (err) {
