@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-shadow */
 /* eslint-disable arrow-body-style */
 /* eslint-disable no-return-await */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-param-reassign */
 /* eslint-disable react/display-name */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import InputBase from '@material-ui/core/InputBase';
 import TextField from '@material-ui/core/TextField';
@@ -147,15 +148,9 @@ export default function DeviceDataGrid(props) {
 
   const [editRowsModel, setEditRowsModel] = useState({});
 
-  const handleEditRowModelChange = React.useCallback(params => {
-    setEditRowsModel(params.model);
-  }, []);
-
   const options = ['Car', 'Bot', 'Drone', 'Monitor'];
 
   const renderTags = value => {
-    // console.log('Rendering tags: ');
-    // console.log(value);
     if (!value) {
       value = [];
     }
@@ -172,8 +167,6 @@ export default function DeviceDataGrid(props) {
             variant="outlined"
             key={option}
             style={{
-              // borderColor: theme.palette.primary.main,
-              // borderWidth: 1,
               background: fade(theme.palette.background.widget, 0.2),
               color: theme.palette.text.secondary,
               marginRight: theme.spacing(1),
@@ -209,13 +202,29 @@ export default function DeviceDataGrid(props) {
             value: newValue,
           };
 
-          console.log(newValue);
-          // data[id][field] = newValue;
-          // row[field] = newValue;
-          api.setCellValue({ id, field, value: newValue });
-          // api.commitCellChange({ id, field, props: editProps });
-          api.setCellMode(id, field, 'view');
-          // api.setCellMode(id, field, 'edit');
+          event.key
+            ? api.setEditCellProps(
+                {
+                  id,
+                  field,
+                  props: editProps,
+                },
+                event,
+              )
+            : (api.commitCellChange({
+                id,
+                field,
+                props: editProps,
+              }),
+              api.setCellMode(id, field, 'view'));
+
+          data[id][field] = newValue;
+          // api.commitCellChange({
+          //   id,
+          //   field,
+          //   props: editProps,
+          // });
+          // api.setCellMode(id, field, 'view');
         }}
         renderTags={(value, getTagProps) => renderTags(value)}
         renderInput={params => (
@@ -244,8 +253,50 @@ export default function DeviceDataGrid(props) {
   );
 
   const handleSave = async row => {
-    row.modified = false;
-    return row;
+    const modifyDevice = async device => {
+      console.log('Payload:');
+      console.log(device);
+
+      const res = await fetch(`/api/device/replace`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(device),
+      });
+
+      const body = await res.text();
+
+      if (res.ok) {
+        console.log('Device created');
+        console.log(`Response: `);
+        console.log(body);
+        row.modified = false;
+        return true;
+      } else {
+        console.error('Cannot modify the device');
+        console.error(`Response: `);
+        console.error(body);
+        setErrorMessage(body);
+        return false;
+      }
+    };
+
+    try {
+      const result = await modifyDevice({
+        mqttId: row.mqttId,
+        name: row.name,
+        desc: row.desc,
+        type: row.type,
+        user: {
+          email,
+        },
+      });
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+    return false;
   };
 
   const checkSave = row => row.modified;
@@ -259,8 +310,11 @@ export default function DeviceDataGrid(props) {
         style={{
           background: theme.palette.primary.main,
         }}
-        onClick={() => {
-          handleSave(params.row);
+        onClick={async event => {
+          const result = await handleSave(params.row);
+          if (!result) {
+            setAnchorEl(event.target);
+          }
         }}
       >
         Save
@@ -328,7 +382,7 @@ export default function DeviceDataGrid(props) {
     }
   };
 
-  const handlePopverClose = () => {
+  const handlePopoverClose = () => {
     setAnchorEl(null);
   };
 
@@ -342,7 +396,7 @@ export default function DeviceDataGrid(props) {
         }}
         disabled={disabled}
         onClick={async event => {
-          // async update with server
+          const { api, id, field, value } = params;
           const result = await handleCreate(params.row);
           if (!result) {
             setAnchorEl(event.target);
@@ -477,12 +531,29 @@ export default function DeviceDataGrid(props) {
     },
   ];
 
+  const handleAddDevice = useCallback(() => {
+    const newId = data.length;
+    setData([
+      ...data,
+      {
+        id: newId,
+        mqttId: `device-#${newId}`,
+        name: 'Device Name',
+        desc: 'Description',
+        type: [],
+        new: true,
+        modified: false,
+      },
+    ]);
+  }, [data]);
+
   return (
     <div className={classes.table}>
       <Popover
         open={Boolean(anchorEl && errorMessage)}
         anchorEl={anchorEl}
-        onClose={handlePopverClose}
+        onClose={handlePopoverClose}
+        onClick={handlePopoverClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',
@@ -517,24 +588,18 @@ export default function DeviceDataGrid(props) {
             return classes.normal;
           }
         }}
-        onEditCellChange={params => {
-          console.log('This edit happens');
-          console.log(params);
-          console.log('Is the const: rows, changed?');
-          console.log(tempData === data);
-        }}
-        onEditCellChangeCommitted={params => {
-          console.log('This edit has been committed');
-          console.log(params);
-          console.log('Is the const: rows, changed?');
-          console.log(tempData === data);
-          const { id, field, props } = params;
-
-          data[id][field] = props.value;
-
-          console.log(data);
-          // setData(state => [...state, ...data]);
-          setData(data);
+        onEditRowModelChange={params => {
+          const { api, model } = params;
+          console.log('onEditRowModelChange');
+          console.log(model);
+          if (Object.keys(model).length) {
+            const id = Object.keys(model)[0];
+            const field = Object.keys(model[id])[0];
+            const { value } = model[id][field];
+            data[id][field] = value;
+            console.log('Updated data');
+            console.log(data);
+          }
         }}
         selectionModel={selection}
         onSelectionModelChange={newSelection => {
@@ -545,26 +610,13 @@ export default function DeviceDataGrid(props) {
         components={{
           Toolbar: GridToolbar,
         }}
-        // editRowsModel={editRowsModel}
-        // onEditRowModelChange={handleEditRowModelChange}
       />
       <IoTButton
         style={{
           marginLeft: 16,
           background: theme.palette.primary.main,
         }}
-        onClick={() => {
-          const newId = data.length;
-          setData([
-            ...data,
-            {
-              id: newId,
-              mqttId: `device-#${newId}`,
-              new: true,
-              modified: false,
-            },
-          ]);
-        }}
+        onClick={handleAddDevice}
       >
         Add Device
       </IoTButton>
