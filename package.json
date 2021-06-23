@@ -54,6 +54,7 @@
     "history": "^5.0.0",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.6.0",
+    "lodash": "^4.17.21",
     "miragejs": "^0.1.41",
     "moment": "^2.29.1",
     "prop-types": "^15.7.2",
@@ -63,6 +64,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "react-scroll-to-bottom": "^4.1.2",
+    "uuid": "^8.3.2",
     "web-vitals": "^1.1.1"
   },
   "devDependencies": {

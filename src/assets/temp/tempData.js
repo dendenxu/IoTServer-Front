@@ -11,6 +11,7 @@ export default [
     alert: 0,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 1,
@@ -24,6 +25,7 @@ export default [
     alert: 0,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 2,
@@ -37,6 +39,7 @@ export default [
     alert: 1,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 3,
@@ -50,6 +53,7 @@ export default [
     alert: 1,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 4,
@@ -63,6 +67,7 @@ export default [
     alert: 0,
     new: false,
     modified: false,
+    version: 0,
   },
   {
     id: 5,
@@ -75,6 +80,7 @@ export default [
     alert: 0,
     new: false,
     modified: false,
+    version: 0,
   },
   {
     id: 6,
@@ -87,6 +93,7 @@ export default [
     value: 50,
     new: false,
     modified: false,
+    version: 0,
   },
   {
     id: 7,
@@ -100,6 +107,7 @@ export default [
     alert: 1,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 8,
@@ -113,6 +121,7 @@ export default [
     alert: 1,
     new: false,
     modified: true,
+    version: 0,
   },
   {
     id: 9,
@@ -122,5 +131,6 @@ export default [
     type: ['Bot', 'Car'],
     new: true,
     modified: false,
+    version: 0,
   },
 ];

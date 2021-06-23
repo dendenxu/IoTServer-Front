@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-shadow */
 /* eslint-disable arrow-body-style */
@@ -15,6 +16,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { DataGrid, GridToolbar } from '@material-ui/data-grid';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
+import { v4 as uuid } from 'uuid';
+import _ from 'lodash';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import Chip from '@material-ui/core/Chip';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -141,12 +144,71 @@ export default function DeviceDataGrid(props) {
   const { email } = props;
   const theme = useTheme();
   const classes = useStyles();
-  const [data, setData] = useState(tempData);
+  const [data, setData] = useState([]);
   const [selection, setSelection] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const [editRowsModel, setEditRowsModel] = useState({});
+
+  // {
+  //   id: 0,
+  //   mqttId: 'device-#0',
+  //   name: 'First Device',
+  //   desc: 'This is a strange device',
+  //   type: ['Bot'],
+  //   createdDate: new Date(),
+  //   statusUpdateDate: new Date(),
+  //   value: 250,
+  //   alert: 0,
+  //   new: false,
+  //   modified: true,
+  //   version: 0,
+  // },
+
+  // const isDeviceEqual = (lhs, rhs)=>{
+
+  // }
+
+  const fetchDataFromServer = async () => {
+    const res = await fetch('/api/device/query');
+    if (res.ok) {
+      const body = await res.json();
+      console.log('Getting data from server');
+      console.log(body);
+      // setData(body);
+      for (let i = 0; i < body.length; i++) {
+        body[i].id = i;
+        // mqttId
+        // name
+        // desc
+        body[i].type = body[i].type.sort();
+        body[i].createdDate = new Date(body[i].createdDate);
+        body[i].lastModifiedDate = new Date(body[i].lastModifiedDate);
+        body[i].statusUpdateDate = body[i].lastModifiedDate;
+        // TODO: populate these field
+        // body[i].value = Math.round(Math.random() * 100);
+        body[i].value = 100;
+        // body[i].alert = Math.random() > 0.5;
+        body[i].alert = 0;
+        body[i].new = false;
+        body[i].modified = false;
+        // version
+
+        // ! unused field
+        delete body[i].recycled;
+        delete body[i].user;
+        // delete body[i].lastModifiedDate;
+      }
+      // if (_.isEqual(body, data)) {
+      //   console.log('What happend?');
+      //   return;
+      // }
+      setData(body);
+    }
+  };
+
+  useEffect(fetchDataFromServer, [email]);
 
   const options = ['Car', 'Bot', 'Drone', 'Monitor'];
 
@@ -198,6 +260,7 @@ export default function DeviceDataGrid(props) {
         }}
         onChange={(event, newValue) => {
           console.log('Commiting changes');
+          newValue = newValue.sort();
           const editProps = {
             value: newValue,
           };
@@ -219,12 +282,9 @@ export default function DeviceDataGrid(props) {
               api.setCellMode(id, field, 'view'));
 
           data[id][field] = newValue;
-          // api.commitCellChange({
-          //   id,
-          //   field,
-          //   props: editProps,
-          // });
-          // api.setCellMode(id, field, 'view');
+
+          api.commitCellChange({ id, field: 'modified', props: editProps });
+          data[id].modified = true;
         }}
         renderTags={(value, getTagProps) => renderTags(value)}
         renderInput={params => (
@@ -271,7 +331,7 @@ export default function DeviceDataGrid(props) {
         console.log('Device created');
         console.log(`Response: `);
         console.log(body);
-        row.modified = false;
+        fetchDataFromServer();
         return true;
       } else {
         console.error('Cannot modify the device');
@@ -288,9 +348,7 @@ export default function DeviceDataGrid(props) {
         name: row.name,
         desc: row.desc,
         type: row.type,
-        user: {
-          email,
-        },
+        version: row.version,
       });
       return result;
     } catch (err) {
@@ -303,6 +361,7 @@ export default function DeviceDataGrid(props) {
 
   const renderSave = params => {
     const disabled = !checkSave(params.row);
+    const { api, id, field, value } = params;
 
     return (
       <TableButton
@@ -314,6 +373,17 @@ export default function DeviceDataGrid(props) {
           const result = await handleSave(params.row);
           if (!result) {
             setAnchorEl(event.target);
+          } else {
+            const editProps = {
+              value: false,
+            };
+            // creation successful, update the table by:
+            api.commitCellChange({
+              id,
+              field: 'modified',
+              props: editProps,
+            });
+            data[id].modified = false;
           }
         }}
       >
@@ -341,7 +411,7 @@ export default function DeviceDataGrid(props) {
         console.log('Device created');
         console.log(`Response: `);
         console.log(body);
-        row.new = false;
+        fetchDataFromServer();
         return true;
       } else {
         console.error('Cannot create the device');
@@ -382,6 +452,48 @@ export default function DeviceDataGrid(props) {
     }
   };
 
+  const handleDeleteDevice = async row => {
+    const deleteDevice = async device => {
+      console.log('Payload:');
+      console.log(device);
+
+      const res = await fetch(`/api/device/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(device),
+      });
+
+      const body = await res.text();
+
+      if (res.ok) {
+        console.log('Device deleted');
+        console.log(`Response: `);
+        console.log(body);
+        // fetchDataFromServer();
+        return true;
+      } else {
+        console.error('Cannot delete the device');
+        console.error(`Response: `);
+        console.error(body);
+        setErrorMessage(body);
+        return false;
+      }
+    };
+
+    try {
+      const result = await deleteDevice({
+        mqttId: row.mqttId,
+        version: row.version,
+      });
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+    return false;
+  };
+
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
@@ -400,6 +512,18 @@ export default function DeviceDataGrid(props) {
           const result = await handleCreate(params.row);
           if (!result) {
             setAnchorEl(event.target);
+          } else {
+            const editProps = {
+              value: false,
+            };
+            // creation successful, update the table by:
+            api.commitCellChange({
+              id,
+              field: 'new',
+              props: editProps,
+            });
+            // console.log(data[id]);
+            data[id].new = false;
           }
         }}
       >
@@ -472,7 +596,14 @@ export default function DeviceDataGrid(props) {
       field: 'createdDate',
       headerName: 'Created At',
       flex: 0.115,
-
+      hide: true,
+      editable: false,
+      type: 'dateTime',
+    },
+    {
+      field: 'lastModifiedDate',
+      headerName: 'Last Modified',
+      flex: 0.115,
       editable: false,
       type: 'dateTime',
     },
@@ -540,7 +671,7 @@ export default function DeviceDataGrid(props) {
         mqttId: `device-#${newId}`,
         name: 'Device Name',
         desc: 'Description',
-        type: [],
+        type: ['Bot'],
         new: true,
         modified: false,
       },
@@ -592,13 +723,27 @@ export default function DeviceDataGrid(props) {
           const { api, model } = params;
           console.log('onEditRowModelChange');
           console.log(model);
+
           if (Object.keys(model).length) {
             const id = Object.keys(model)[0];
             const field = Object.keys(model[id])[0];
             const { value } = model[id][field];
+            if (data[id][field] === value) {
+              return;
+            }
             data[id][field] = value;
             console.log('Updated data');
             console.log(data);
+            const editProps = {
+              value: true,
+            };
+            if (field === 'mqttId') {
+              api.commitCellChange({ id, field: 'new', props: editProps });
+              data[id].new = true;
+            } else {
+              api.commitCellChange({ id, field: 'modified', props: editProps });
+              data[id].modified = true;
+            }
           }
         }}
         selectionModel={selection}
@@ -644,39 +789,37 @@ export default function DeviceDataGrid(props) {
               marginLeft: 16,
               background: theme.palette.error.main,
             }}
-            onClick={() => {
+            onClick={async event => {
               console.log('Trying to delete: ');
               console.log(selection);
-              const newData = [];
 
-              const pushData = (prev, next) => {
-                for (let j = prev; j < next; j++) {
-                  const newItem = data[j];
-                  newItem.id = newData.length;
-                  newData.push(data[j]);
-                }
-              };
-
-              let prev = 0;
-              let next = 0;
+              const failed = [];
+              const success = [];
               for (let i = 0; i < selection.length; i++) {
-                next = selection[i]; // selection model starts at 1
-                pushData(prev, next);
-                prev = next + 1;
+                const row = data[i];
+                const result = await handleDeleteDevice(row);
+                if (!result) {
+                  setAnchorEl(event.target);
+                  failed.push(i);
+                } else {
+                  success.push(i);
+                }
               }
-              next = data.length;
-              console.log(`Current prev: ${prev}`);
-              console.log(`Current newData: `);
-              console.log(newData);
-              pushData(prev, next);
 
+              const retained = [];
+              // TODO: this can be optimized
+              const newData = data.filter(item => !success.includes(item.id));
+              for (let i = 0; i < newData.length; i++) {
+                // TODO: this can be optimized
+                if (failed.includes(newData[i].id)) {
+                  retained.push(i);
+                }
+                newData[i].id = i;
+              }
+
+              console.log(newData);
               setData(newData);
-              setSelection([]);
-
-              console.log('Getting newData');
-              console.log(newData);
-
-              // what if?
+              setSelection(retained);
             }}
           >
             Delete Selected
