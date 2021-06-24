@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 
 export default function Loading(props) {
@@ -9,30 +10,33 @@ export default function Loading(props) {
     <>
       {loadingData && (
         <Box
-          position="absolute"
           style={{
             display: 'flex',
             justifyContent: 'center',
+            position: 'absolute',
             width: '100%',
-            height: '100%',
+            // height: '100%',
             paddingTop: '10%',
+            top: 0,
           }}
+          zIndex={21}
         >
-          <CircularProgress
-            size={68}
-            style={{
-              zIndex: 1,
-            }}
-          />
+          {/* <LinearProgress /> */}
+          <CircularProgress size={68} thickness={5.2} />
         </Box>
       )}
       {loadingData && (
         <Box
-          style={{ height: '100%', width: '100%', position: 'absolute' }}
+          style={{
+            height: '100%',
+            width: '100%',
+            position: 'absolute',
+            backdropFilter: `${loadingData ? 'blur(5px)' : 'blur(0)'}`,
+          }}
           position="absolute"
           top={0}
           left={0}
-          zIndex="tooltip"
+          zIndex={10}
         />
       )}
     </>

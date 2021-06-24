@@ -265,7 +265,7 @@ function Signin(props) {
 
           <Container
             className={classes.borderedContainer}
-            style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
+            // style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
             position="absolute"
             top={0}
           >

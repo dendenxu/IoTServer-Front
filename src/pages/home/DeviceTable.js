@@ -33,6 +33,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
+import Loading from '../components/LoadingMask';
 
 const useStyles = makeStyles(theme => {
   const noOutline = {
@@ -719,13 +720,13 @@ export default function DeviceDataGrid(props) {
 
   const [loading, setLoading] = useState(false);
 
-  const CustomLoadingOverlay = () => (
-    <GridOverlay>
-      <div style={{ position: 'absolute', top: 0, width: '100%' }}>
-        <LinearProgress />
-      </div>
-    </GridOverlay>
-  );
+  // <GridOverlay>
+  // {/* <div style={{ position: 'absolute', top: 0, width: '100%' }}>
+  //   <LinearProgress />
+  // </div> */}
+  // <Loading loadingData />
+  // </GridOverlay>
+  const CustomLoadingOverlay = () => <Loading loadingData />;
 
   const handleRefresh = async e => {
     setLoading(true);

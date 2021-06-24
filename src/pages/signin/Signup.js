@@ -444,7 +444,7 @@ function Signup(props) {
         <Loading loadingData={loadingData} />
         <Box
           className={classes.borderedContainer}
-          style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
+          // style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
         >
           <Container className={classes.logoContainer}>
             <Icon className={classes.logo} />
