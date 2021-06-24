@@ -22,6 +22,7 @@ import Copyright from '../components/Copyright';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
 import ToggleBox from '../components/ToggleBox';
+import Loading from '../components/LoadingMask';
 
 const useStyles = makeStyles(theme => {
   const gridPadding = theme.spacing(0.5, 2.5);
@@ -54,6 +55,7 @@ const useStyles = makeStyles(theme => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      position: 'relative',
     },
 
     welcome: {
@@ -243,6 +245,7 @@ function Signup(props) {
   const [usetType, setusetType] = useState(-1);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [loadingData, setLoadingData] = useState(false);
 
   // note that this is a full-width space
   // material ui seems to ignore the half-width one
@@ -324,9 +327,13 @@ function Signup(props) {
       if (response.ok) {
         console.log('Successfully registered the user');
         history.push('/signin?registered');
+        return true;
+      } else {
+        return false;
       }
     };
 
+    setLoadingData(true);
     try {
       if (!validFormEmail) {
         console.log('Wrong email format, refusing to login');
@@ -358,13 +365,17 @@ function Signup(props) {
           `Valid form email: ${validFormEmail}, input content: ${inputContent}`,
         );
 
-        registerUser();
+        const result = await registerUser();
+        if (result) {
+          return;
+        }
       } else {
         console.log('Something is wrong.');
       }
     } catch (err) {
       console.log(err);
     }
+    setLoadingData(false);
   };
 
   const open = Boolean(anchorEl);
@@ -430,7 +441,11 @@ function Signup(props) {
       <CssBaseline />
 
       <Container className={classes.signUpContainer}>
-        <Box className={classes.borderedContainer}>
+        <Loading loadingData={loadingData} />
+        <Box
+          className={classes.borderedContainer}
+          style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
+        >
           <Container className={classes.logoContainer}>
             <Icon className={classes.logo} />
 

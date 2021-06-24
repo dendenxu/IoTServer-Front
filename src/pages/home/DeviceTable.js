@@ -6,18 +6,30 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useEffect, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import InputBase from '@material-ui/core/InputBase';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
 import Checkbox from '@material-ui/core/Checkbox';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { DataGrid, GridToolbar } from '@material-ui/data-grid';
+import {
+  DataGrid,
+  GridToolbar,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarExport,
+  GridToolbarDensitySelector,
+  GridOverlay,
+} from '@material-ui/data-grid';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import Chip from '@material-ui/core/Chip';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
@@ -705,6 +717,35 @@ export default function DeviceDataGrid(props) {
     return [status, retained];
   };
 
+  const [loading, setLoading] = useState(false);
+
+  const CustomLoadingOverlay = () => (
+    <GridOverlay>
+      <div style={{ position: 'absolute', top: 0, width: '100%' }}>
+        <LinearProgress />
+      </div>
+    </GridOverlay>
+  );
+
+  const handleRefresh = async e => {
+    setLoading(true);
+    const result = await fetchDataFromServer();
+    setLoading(false);
+  };
+
+  const CustomToolbar = () => (
+    <GridToolbarContainer>
+      <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+      <GridToolbarDensitySelector />
+      <GridToolbarExport />
+      <Button color="primary" size="small" onClick={handleRefresh}>
+        <RefreshIcon />
+        Refresh
+      </Button>
+    </GridToolbarContainer>
+  );
+
   return (
     <div className={classes.table}>
       <Popover
@@ -734,6 +775,7 @@ export default function DeviceDataGrid(props) {
         disableSelectionOnClick
         autoHeight
         autoPageSize
+        loading={loading}
         // hideFooterPagination
         getRowClassName={params => {
           if (params.row.new) {
@@ -767,7 +809,8 @@ export default function DeviceDataGrid(props) {
           setSelection(newSelection.selectionModel);
         }}
         components={{
-          Toolbar: GridToolbar,
+          Toolbar: CustomToolbar,
+          LoadingOverlay: CustomLoadingOverlay,
         }}
       />
       <IoTButton

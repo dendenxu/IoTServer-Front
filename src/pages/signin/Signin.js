@@ -21,6 +21,7 @@ import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
 import ToggleBox from '../components/ToggleBox';
+import Loading from '../components/LoadingMask';
 
 const useStyles = makeStyles(theme => ({
   // TODO: fix these ugly naming...
@@ -260,29 +261,7 @@ function Signin(props) {
         <Icon className={classes.icon} />
 
         <Box style={{ height: '100%', width: '100%', position: 'relative' }}>
-          {loadingData && (
-            <Box
-              position="absolute"
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-                height: '100%',
-                paddingTop: '10%',
-              }}
-            >
-              <CircularProgress size={68} className={classes.loadingProgress} />
-            </Box>
-          )}
-          {loadingData && (
-            <Box
-              style={{ height: '100%', width: '100%', position: 'absolute' }}
-              position="absolute"
-              top={0}
-              left={0}
-              zIndex="tooltip"
-            />
-          )}
+          <Loading loadingData={loadingData} />
 
           <Container
             className={classes.borderedContainer}
