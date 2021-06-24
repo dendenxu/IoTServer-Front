@@ -6,13 +6,10 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useEffect, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import InputBase from '@material-ui/core/InputBase';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
 import Checkbox from '@material-ui/core/Checkbox';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {
   DataGrid,
@@ -160,27 +157,6 @@ export default function DeviceDataGrid(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [editRowsModel, setEditRowsModel] = useState({});
-
-  // {
-  //   id: 0,
-  //   mqttId: 'device-#0',
-  //   name: 'First Device',
-  //   desc: 'This is a strange device',
-  //   type: ['Bot'],
-  //   createdDate: new Date(),
-  //   statusUpdateDate: new Date(),
-  //   value: 250,
-  //   alert: 0,
-  //   new: false,
-  //   modified: true,
-  //   version: 0,
-  // },
-
-  // const isDeviceEqual = (lhs, rhs)=>{
-
-  // }
-
   const processPayload = (payload, i) => {
     payload.id = i;
     // mqttId
@@ -190,7 +166,6 @@ export default function DeviceDataGrid(props) {
     payload.createdDate = new Date(payload.createdDate);
     payload.lastModifiedDate = new Date(payload.lastModifiedDate);
     payload.statusUpdateDate = payload.date ? new Date(payload.date) : null;
-    // TODO: populate these field
     // payload.value;
     // payload.alert;
     payload.new = false;
@@ -203,26 +178,24 @@ export default function DeviceDataGrid(props) {
     // delete payload.lastModifiedDate;
   };
 
+  // Quitely and passively fetch data from the server
   const fetchDataFromServer = async () => {
+    // Fetch full data from the server, including latest status
     const res = await fetch('/api/device/status');
     if (res.ok) {
       const body = await res.json();
       console.log('Getting data from server');
       console.log(body);
-      // setData(body);
       for (let i = 0; i < body.length; i++) {
         processPayload(body[i], i);
       }
-      // if (_.isEqual(body, data)) {
-      //   console.log('What happend?');
-      //   return;
-      // }
       setData(body);
     }
   };
 
   const updateDeviceFromServer = async id => {
-    const res = await fetch(`/api/device/query?mqttId=${data[id].mqttId}`);
+    // fetch only the deta indicated by mqttId, ! not the parameter but data[id].id
+    const res = await fetch(`/api/device/status?mqttId=${data[id].mqttId}`);
     if (res.ok) {
       const payload = await res.json();
       console.log('Getting data from server');
@@ -232,14 +205,14 @@ export default function DeviceDataGrid(props) {
       console.log(payload);
       setData([
         ...data.slice(0, id),
+        // { ...data[id], ...payload }, // should not override
         payload,
         ...data.slice(id + 1, data.length),
       ]);
     }
   };
 
-  useEffect(fetchDataFromServer, [email]);
-
+  // column type definition: options + renderEditCell + renderCell
   const options = ['Car', 'Bot', 'Drone', 'Monitor'];
 
   const renderTags = value => {
@@ -330,6 +303,7 @@ export default function DeviceDataGrid(props) {
     );
   };
 
+  // render some bold font to display important stuff
   const renderBold = params => (
     <Typography
       style={{
@@ -403,7 +377,6 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
-            // fetchDataFromServer();
             updateDeviceFromServer(id);
             const editProps = {
               value: false,
@@ -472,57 +445,6 @@ export default function DeviceDataGrid(props) {
   const checkCreate = row =>
     row.mqttId && row.name && row.type && row.type.length !== 0 && row.desc;
 
-  const handleDeviceAction = async row => {
-    if (row.new && checkCreate(row)) {
-      return await handleCreate(row);
-    } else if (row.modified && checkSave(row)) {
-      return await handleSave(row);
-    } else {
-      return true;
-    }
-  };
-
-  const handleDeleteDevice = async row => {
-    const deleteDevice = async device => {
-      console.log('Payload:');
-      console.log(device);
-
-      const res = await fetch(`/api/device/delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(device),
-      });
-
-      const body = await res.text();
-
-      if (res.ok) {
-        console.log('Device deleted');
-        console.log(`Response: `);
-        console.log(body);
-        return true;
-      } else {
-        console.error('Cannot delete the device');
-        console.error(`Response: `);
-        console.error(body);
-        setErrorMessage(body);
-        return false;
-      }
-    };
-
-    try {
-      const result = await deleteDevice({
-        mqttId: row.mqttId,
-        version: row.version,
-      });
-      return result;
-    } catch (err) {
-      console.error(err);
-    }
-    return false;
-  };
-
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
@@ -542,7 +464,6 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
-            // fetchDataFromServer();
             updateDeviceFromServer(id);
             const editProps = {
               value: false,
@@ -553,7 +474,6 @@ export default function DeviceDataGrid(props) {
               field: 'new',
               props: editProps,
             });
-            // console.log(data[id]);
             data[id].new = false;
           }
         }}
@@ -701,7 +621,17 @@ export default function DeviceDataGrid(props) {
     },
   ];
 
-  const handleAddDevice = useCallback(() => {
+  const handleDeviceAction = async row => {
+    if (row.new && checkCreate(row)) {
+      return await handleCreate(row);
+    } else if (row.modified && checkSave(row)) {
+      return await handleSave(row);
+    } else {
+      return true;
+    }
+  };
+
+  const handleAddRow = () => {
     const newId = data.length;
     setData([
       ...data,
@@ -715,14 +645,61 @@ export default function DeviceDataGrid(props) {
         modified: false,
       },
     ]);
-  }, [data]);
+  };
 
-  const handleGroupAction = async (handle, event) => {
+  const handleDeleteDevice = async row => {
+    const deleteDevice = async device => {
+      console.log('Payload:');
+      console.log(device);
+
+      const res = await fetch(`/api/device/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(device),
+      });
+
+      const body = await res.text();
+
+      if (res.ok) {
+        console.log('Device deleted');
+        console.log(`Response: `);
+        console.log(body);
+        return true;
+      } else {
+        console.error('Cannot delete the device');
+        console.error(`Response: `);
+        console.error(body);
+        setErrorMessage(body);
+        return false;
+      }
+    };
+
+    try {
+      const result = await deleteDevice({
+        mqttId: row.mqttId,
+        version: row.version,
+      });
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+    return false;
+  };
+
+  const handleSelectionAction = async (handle, event) => {
     // ! row action will change the data in the background
     let results = [];
     selection.forEach(i => {
       const row = data[i];
-      results.push(handle(row));
+      results.push(
+        handle(row)
+          .then(() => {})
+          .catch(() => {
+            console.log('Errors');
+          }),
+      );
     });
     results = (await Promise.all(results)).map(item => item | 0);
     if (!results.every(item => item)) {
@@ -747,17 +724,11 @@ export default function DeviceDataGrid(props) {
 
   const [loading, setLoading] = useState(false);
 
-  // <GridOverlay>
-  // {/* <div style={{ position: 'absolute', top: 0, width: '100%' }}>
-  //   <LinearProgress />
-  // </div> */}
-  // <Loading loadingData />
-  // </GridOverlay>
   const CustomLoadingOverlay = () => <Loading loadingData />;
 
   const handleRefresh = async e => {
     setLoading(true);
-    const result = await fetchDataFromServer();
+    await fetchDataFromServer();
     setLoading(false);
   };
 
@@ -798,7 +769,6 @@ export default function DeviceDataGrid(props) {
         rows={data}
         columns={columns}
         // pageSize={5}
-        // disableExtendRowFullWidth
         checkboxSelection
         disableSelectionOnClick
         autoHeight
@@ -846,7 +816,7 @@ export default function DeviceDataGrid(props) {
           marginLeft: 16,
           background: theme.palette.primary.main,
         }}
-        onClick={handleAddDevice}
+        onClick={handleAddRow}
       >
         Add Device
       </IoTButton>
@@ -862,7 +832,7 @@ export default function DeviceDataGrid(props) {
               console.log('Trying to perform action: ');
               console.log(selection);
 
-              const [status, retained] = await handleGroupAction(
+              const [status, retained] = await handleSelectionAction(
                 handleDeviceAction,
                 event,
               );
@@ -883,7 +853,7 @@ export default function DeviceDataGrid(props) {
               console.log(selection);
 
               // networking results, true for ok, false for not
-              const [status, retained] = await handleGroupAction(
+              const [status, retained] = await handleSelectionAction(
                 handleDeleteDevice,
                 event,
               );

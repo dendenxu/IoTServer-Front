@@ -42,7 +42,8 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.light.dark,
     justifyContent: 'left',
     alignItems: 'center',
-    borderRadius: '10px',
+    margin: theme.spacing(0, 0),
+    borderRadius: theme.spacing(2),
   },
   flex: {
     display: 'flex',
@@ -50,7 +51,10 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
   },
   semibold: {
+    fontFamily: 'Teko',
     fontWeight: 500,
+    fontSize: '1.2rem',
+    lineHeight: 1.75,
   },
   divide: {
     background: theme.palette.background.button,
@@ -74,7 +78,7 @@ const ListButton = props => {
           {props.children}
         </div>
         <div className={classes.flex}>
-          <Typography variant="h6" className={classes.semibold}>
+          <Typography component="p" className={classes.semibold}>
             {text}
           </Typography>
         </div>

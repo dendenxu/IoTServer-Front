@@ -1,1 +1,1 @@
-global.drawerWidth = 240;
+global.drawerWidth = 200;

@@ -23,7 +23,6 @@ import IoTButton from '../components/IoTButton';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
 import DeviceTable from './DeviceTable';
-import XGridDemo from './XGridDemo';
 
 const useStyles = makeStyles(theme => ({
   growWidth: {
