@@ -439,7 +439,7 @@ export default function DeviceDataGrid(props) {
   const checkCreate = row =>
     row.mqttId && row.name && row.type && row.type.length !== 0 && row.desc;
 
-  const handleRowAction = async row => {
+  const handleDeviceAction = async row => {
     if (row.new && checkCreate(row)) {
       return await handleCreate(row);
     } else if (row.modified && checkSave(row)) {
@@ -677,6 +677,34 @@ export default function DeviceDataGrid(props) {
     ]);
   }, [data]);
 
+  const handleGroupAction = async (handle, event) => {
+    // ! row action will change the data in the background
+    let results = [];
+    selection.forEach(i => {
+      const row = data[i];
+      results.push(handle(row));
+    });
+    results = (await Promise.all(results)).map(item => item | 0);
+    if (!results.every(item => item)) {
+      setAnchorEl(event.target);
+    }
+
+    // the status array of all current data
+    const status = Array(data.length).fill(-1);
+
+    // update status according to networking results
+    for (let i = 0; i < selection.length; i++) {
+      status[selection[i]] = results[i];
+    }
+
+    // 0 would be not ok results
+    const retained = [...Array(status.length).keys()].filter(
+      item => !status[item],
+    );
+
+    return [status, retained];
+  };
+
   return (
     <div className={classes.table}>
       <Popover
@@ -760,29 +788,13 @@ export default function DeviceDataGrid(props) {
               background: theme.palette.warning.main,
             }}
             onClick={async event => {
-              // ! row action will change the data in the background
-              let results = [];
-              selection.forEach(i => {
-                const row = data[i];
-                results.push(handleRowAction(row));
-              });
-              results = (await Promise.all(results)).map(item => item | 0);
-              if (!results.every(item => item)) {
-                setAnchorEl(event.target);
-              }
+              console.log('Trying to perform action: ');
+              console.log(selection);
 
-              // the status array of all current data
-              const status = Array(data.length).fill(-1);
-
-              // update status according to networking results
-              for (let i = 0; i < selection.length; i++) {
-                status[selection[i]] = results[i];
-              }
-
-              // 0 would be not ok results
-              const retained = Array(status.length)
-                .keys()
-                .filter(item => status[item]);
+              const [status, retained] = await handleGroupAction(
+                handleDeviceAction,
+                event,
+              );
 
               fetchDataFromServer();
               setSelection(retained);
@@ -800,31 +812,10 @@ export default function DeviceDataGrid(props) {
               console.log(selection);
 
               // networking results, true for ok, false for not
-              let results = [];
-              selection.forEach(i => {
-                const row = data[i];
-                results.push(handleDeleteDevice(row));
-              });
-              results = (await Promise.all(results)).map(item => item | 0);
-
-              console.log(results);
-
-              if (!results.every(item => item)) {
-                setAnchorEl(event.target);
-              }
-
-              // the status array of all current data
-              const status = Array(data.length).fill(-1);
-
-              // update status according to networking results
-              for (let i = 0; i < selection.length; i++) {
-                status[selection[i]] = results[i];
-              }
-
-              // 0 would be not ok results
-              const retained = Array(status.length)
-                .keys()
-                .filter(item => status[item]);
+              const [status, retained] = await handleGroupAction(
+                handleDeleteDevice,
+                event,
+              );
               // 1 would be successful deletion
               const newData = data.filter(item => status[item.id] !== 1);
               for (let i = 0; i < newData.length; i++) {
