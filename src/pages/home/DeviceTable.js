@@ -181,6 +181,28 @@ export default function DeviceDataGrid(props) {
 
   // }
 
+  const processPayload = (payload, i) => {
+    payload.id = i;
+    // mqttId
+    // name
+    // desc
+    payload.type = payload.type.sort();
+    payload.createdDate = new Date(payload.createdDate);
+    payload.lastModifiedDate = new Date(payload.lastModifiedDate);
+    payload.statusUpdateDate = payload.date ? new Date(payload.date) : null;
+    // TODO: populate these field
+    // payload.value;
+    // payload.alert;
+    payload.new = false;
+    payload.modified = false;
+    // version
+
+    // ! unused field
+    // delete payload.recycled;
+    // delete payload.user;
+    // delete payload.lastModifiedDate;
+  };
+
   const fetchDataFromServer = async () => {
     const res = await fetch('/api/device/status');
     if (res.ok) {
@@ -189,31 +211,30 @@ export default function DeviceDataGrid(props) {
       console.log(body);
       // setData(body);
       for (let i = 0; i < body.length; i++) {
-        body[i].id = i;
-        // mqttId
-        // name
-        // desc
-        body[i].type = body[i].type.sort();
-        body[i].createdDate = new Date(body[i].createdDate);
-        body[i].lastModifiedDate = new Date(body[i].lastModifiedDate);
-        body[i].statusUpdateDate = body[i].date ? new Date(body[i].date) : null;
-        // TODO: populate these field
-        // body[i].value;
-        // body[i].alert;
-        body[i].new = false;
-        body[i].modified = false;
-        // version
-
-        // ! unused field
-        // delete body[i].recycled;
-        // delete body[i].user;
-        // delete body[i].lastModifiedDate;
+        processPayload(body[i], i);
       }
       // if (_.isEqual(body, data)) {
       //   console.log('What happend?');
       //   return;
       // }
       setData(body);
+    }
+  };
+
+  const updateDeviceFromServer = async id => {
+    const res = await fetch(`/api/device/query?mqttId=${data[id].mqttId}`);
+    if (res.ok) {
+      const payload = await res.json();
+      console.log('Getting data from server');
+      console.log(payload);
+      processPayload(payload, id);
+      console.log('Processed payload');
+      console.log(payload);
+      setData([
+        ...data.slice(0, id),
+        payload,
+        ...data.slice(id + 1, data.length),
+      ]);
     }
   };
 
@@ -382,7 +403,8 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
-            fetchDataFromServer();
+            // fetchDataFromServer();
+            updateDeviceFromServer(id);
             const editProps = {
               value: false,
             };
@@ -520,7 +542,8 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
-            fetchDataFromServer();
+            // fetchDataFromServer();
+            updateDeviceFromServer(id);
             const editProps = {
               value: false,
             };
@@ -670,6 +693,12 @@ export default function DeviceDataGrid(props) {
       headerName: 'Modified',
       flex: 0.08,
     },
+    {
+      field: 'version',
+      hide: true,
+      headerName: 'Version',
+      flex: 0.08,
+    },
   ];
 
   const handleAddDevice = useCallback(() => {
@@ -768,7 +797,7 @@ export default function DeviceDataGrid(props) {
         className={classes.datagrid}
         rows={data}
         columns={columns}
-        // pageSize={6}
+        // pageSize={5}
         // disableExtendRowFullWidth
         checkboxSelection
         disableSelectionOnClick
