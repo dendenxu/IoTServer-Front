@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-shadow */
@@ -331,7 +332,6 @@ export default function DeviceDataGrid(props) {
         console.log('Device created');
         console.log(`Response: `);
         console.log(body);
-        fetchDataFromServer();
         return true;
       } else {
         console.error('Cannot modify the device');
@@ -374,6 +374,7 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
+            fetchDataFromServer();
             const editProps = {
               value: false,
             };
@@ -411,7 +412,6 @@ export default function DeviceDataGrid(props) {
         console.log('Device created');
         console.log(`Response: `);
         console.log(body);
-        fetchDataFromServer();
         return true;
       } else {
         console.error('Cannot create the device');
@@ -471,7 +471,6 @@ export default function DeviceDataGrid(props) {
         console.log('Device deleted');
         console.log(`Response: `);
         console.log(body);
-        // fetchDataFromServer();
         return true;
       } else {
         console.error('Cannot delete the device');
@@ -513,6 +512,7 @@ export default function DeviceDataGrid(props) {
           if (!result) {
             setAnchorEl(event.target);
           } else {
+            fetchDataFromServer();
             const editProps = {
               value: false,
             };
@@ -719,31 +719,45 @@ export default function DeviceDataGrid(props) {
             return classes.normal;
           }
         }}
-        onEditRowModelChange={params => {
-          const { api, model } = params;
-          console.log('onEditRowModelChange');
-          console.log(model);
+        // onEditRowModelChange={params => {
+        //   const { api, model } = params;
+        //   console.log('onEditRowModelChange');
+        //   console.log(model);
 
-          if (Object.keys(model).length) {
-            const id = Object.keys(model)[0];
-            const field = Object.keys(model[id])[0];
-            const { value } = model[id][field];
-            if (data[id][field] === value) {
-              return;
-            }
-            data[id][field] = value;
-            console.log('Updated data');
-            console.log(data);
-            const editProps = {
-              value: true,
-            };
-            if (field === 'mqttId') {
-              api.commitCellChange({ id, field: 'new', props: editProps });
-              data[id].new = true;
-            } else {
-              api.commitCellChange({ id, field: 'modified', props: editProps });
-              data[id].modified = true;
-            }
+        //   if (Object.keys(model).length) {
+        //     const id = Object.keys(model)[0];
+        //     const field = Object.keys(model[id])[0];
+        //     const { value } = model[id][field];
+        //     if (data[id][field] === value) {
+        //       return;
+        //     }
+        //     data[id][field] = value;
+        //     console.log('Updated data');
+        //     console.log(data);
+        //     const editProps = {
+        //       value: true,
+        //     };
+        //     if (field === 'mqttId') {
+        //       api.commitCellChange({ id, field: 'new', props: editProps });
+        //       data[id].new = true;
+        //     } else {
+        //       api.commitCellChange({ id, field: 'modified', props: editProps });
+        //       data[id].modified = true;
+        //     }
+        //   }
+        // }}
+        onEditCellChangeCommitted={params => {
+          console.log(params);
+          const {
+            id,
+            field,
+            props: { value },
+          } = params;
+          data[id][field] = value;
+          if (field === 'mqttId') {
+            data[id].new = true;
+          } else {
+            data[id].modified = true;
           }
         }}
         selectionModel={selection}
@@ -773,13 +787,31 @@ export default function DeviceDataGrid(props) {
               // background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.warning.main} 70%)`,
               background: theme.palette.warning.main,
             }}
-            onClick={() => {
-              // ! bad approach?
+            onClick={async event => {
+              // ! row action will change the data in the background
+              let results = [];
               selection.forEach(i => {
                 const row = data[i];
-                handleRowAction(row);
+                results.push(handleRowAction(row));
               });
-              setSelection([]);
+              results = (await Promise.all(results)).map(item => item | 0);
+              if (!results.every(item => item)) {
+                setAnchorEl(event.target);
+              }
+
+              // the status array of all current data
+              const status = Array(data.length).fill(-1);
+
+              // update status according to networking results
+              for (let i = 0; i < selection.length; i++) {
+                status[selection[i]] = results[i];
+              }
+
+              // 0 would be not ok results
+              const retained = status.filter(item => item === 0);
+
+              fetchDataFromServer();
+              setSelection(retained);
             }}
           >
             Perform Action
@@ -793,27 +825,31 @@ export default function DeviceDataGrid(props) {
               console.log('Trying to delete: ');
               console.log(selection);
 
-              const failed = [];
-              const success = [];
-              for (let i = 0; i < selection.length; i++) {
+              // networking results, true for ok, false for not
+              let results = [];
+              selection.forEach(i => {
                 const row = data[i];
-                const result = await handleDeleteDevice(row);
-                if (!result) {
-                  setAnchorEl(event.target);
-                  failed.push(i);
-                } else {
-                  success.push(i);
-                }
+                results.push(handleDeleteDevice(row));
+              });
+              results = (await Promise.all(results)).map(item => item | 0);
+
+              if (!results.every(item => item)) {
+                setAnchorEl(event.target);
               }
 
-              const retained = [];
-              // TODO: this can be optimized
-              const newData = data.filter(item => !success.includes(item.id));
+              // the status array of all current data
+              const status = Array(data.length).fill(-1);
+
+              // update status according to networking results
+              for (let i = 0; i < selection.length; i++) {
+                status[selection[i]] = results[i];
+              }
+
+              // 0 would be not ok results
+              const retained = status.filter(item => item === 0);
+              // 1 would be successful deletion
+              const newData = data.filter(item => status[item.id] !== 1);
               for (let i = 0; i < newData.length; i++) {
-                // TODO: this can be optimized
-                if (failed.includes(newData[i].id)) {
-                  retained.push(i);
-                }
                 newData[i].id = i;
               }
 
