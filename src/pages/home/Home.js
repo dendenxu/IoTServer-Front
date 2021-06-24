@@ -23,6 +23,7 @@ import IoTButton from '../components/IoTButton';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
 import DeviceTable from './DeviceTable';
+import MessageTable from './MessageTable';
 
 const useStyles = makeStyles(theme => ({
   growWidth: {
@@ -132,8 +133,8 @@ function Home(props) {
         <SectionDrawer />
         <div className={classes.content}>
           <Toolbar />
+          <MessageTable email={email} />
           <DeviceTable email={email} />
-          {/* <XGridDemo /> */}
         </div>
       </div>
     </div>

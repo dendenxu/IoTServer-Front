@@ -587,6 +587,8 @@ export default function DeviceDataGrid(props) {
     {
       field: 'value',
       headerName: 'Value',
+      type: 'number',
+
       flex: 0.087,
       editable: false,
     },
