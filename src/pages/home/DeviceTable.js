@@ -182,7 +182,7 @@ export default function DeviceDataGrid(props) {
   // }
 
   const fetchDataFromServer = async () => {
-    const res = await fetch('/api/device/query');
+    const res = await fetch('/api/device/status');
     if (res.ok) {
       const body = await res.json();
       console.log('Getting data from server');
@@ -196,19 +196,17 @@ export default function DeviceDataGrid(props) {
         body[i].type = body[i].type.sort();
         body[i].createdDate = new Date(body[i].createdDate);
         body[i].lastModifiedDate = new Date(body[i].lastModifiedDate);
-        body[i].statusUpdateDate = body[i].lastModifiedDate;
+        body[i].statusUpdateDate = body[i].date;
         // TODO: populate these field
-        // body[i].value = Math.round(Math.random() * 100);
-        body[i].value = 100;
-        // body[i].alert = Math.random() > 0.5;
-        body[i].alert = 0;
+        // body[i].value;
+        // body[i].alert;
         body[i].new = false;
         body[i].modified = false;
         // version
 
         // ! unused field
-        delete body[i].recycled;
-        delete body[i].user;
+        // delete body[i].recycled;
+        // delete body[i].user;
         // delete body[i].lastModifiedDate;
       }
       // if (_.isEqual(body, data)) {
@@ -680,7 +678,7 @@ export default function DeviceDataGrid(props) {
       ...data,
       {
         id: newId,
-        mqttId: `device-#${newId}`,
+        mqttId: `device${newId.toString().padStart(4, '0')}`,
         name: 'Device Name',
         desc: 'Description',
         type: ['Bot'],
