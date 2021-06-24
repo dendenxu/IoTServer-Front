@@ -196,7 +196,7 @@ export default function DeviceDataGrid(props) {
         body[i].type = body[i].type.sort();
         body[i].createdDate = new Date(body[i].createdDate);
         body[i].lastModifiedDate = new Date(body[i].lastModifiedDate);
-        body[i].statusUpdateDate = body[i].date;
+        body[i].statusUpdateDate = body[i].date ? new Date(body[i].date) : null;
         // TODO: populate these field
         // body[i].value;
         // body[i].alert;
