@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable no-bitwise */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-shadow */
@@ -152,10 +153,20 @@ export default function DeviceDataGrid(props) {
   const { email } = props;
   const theme = useTheme();
   const classes = useStyles();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(
+    JSON.parse(localStorage.getItem('device_table_data')) || [],
+  );
   const [selection, setSelection] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('device_table_data', JSON.stringify(data));
+  }, [data]);
+
+  useEffect(() => {
+    fetchDataFromServer();
+  }, []);
 
   const processPayload = (payload, i) => {
     payload.id = i;
