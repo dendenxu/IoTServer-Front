@@ -1,12 +1,9 @@
 /* eslint-disable no-bitwise */
-/* eslint-disable no-await-in-loop */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-shadow */
-/* eslint-disable arrow-body-style */
 /* eslint-disable no-return-await */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-param-reassign */
-/* eslint-disable react/display-name */
 import React, { useState, useEffect, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import InputBase from '@material-ui/core/InputBase';
@@ -532,6 +529,20 @@ export default function DeviceDataGrid(props) {
     );
   };
 
+  const renderStatus = params => (
+    <Typography
+      style={{
+        fontSize: '1.1rem',
+        fontWeight: 'bold',
+        color: params.row.alert
+          ? theme.palette.error.main
+          : theme.palette.info.main,
+      }}
+    >
+      {params.value}
+    </Typography>
+  );
+
   const columns = [
     {
       disableColumnMenu: true,
@@ -626,19 +637,7 @@ export default function DeviceDataGrid(props) {
           : params.row.alert
           ? 'ALERT'
           : 'NORMAL',
-      renderCell: params => (
-        <Typography
-          style={{
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-            color: params.row.alert
-              ? theme.palette.error.main
-              : theme.palette.info.main,
-          }}
-        >
-          {params.value}
-        </Typography>
-      ),
+      renderCell: renderStatus,
     },
     {
       field: 'statusUpdateDate',
@@ -719,33 +718,6 @@ export default function DeviceDataGrid(props) {
             return classes.normal;
           }
         }}
-        // onEditRowModelChange={params => {
-        //   const { api, model } = params;
-        //   console.log('onEditRowModelChange');
-        //   console.log(model);
-
-        //   if (Object.keys(model).length) {
-        //     const id = Object.keys(model)[0];
-        //     const field = Object.keys(model[id])[0];
-        //     const { value } = model[id][field];
-        //     if (data[id][field] === value) {
-        //       return;
-        //     }
-        //     data[id][field] = value;
-        //     console.log('Updated data');
-        //     console.log(data);
-        //     const editProps = {
-        //       value: true,
-        //     };
-        //     if (field === 'mqttId') {
-        //       api.commitCellChange({ id, field: 'new', props: editProps });
-        //       data[id].new = true;
-        //     } else {
-        //       api.commitCellChange({ id, field: 'modified', props: editProps });
-        //       data[id].modified = true;
-        //     }
-        //   }
-        // }}
         onEditCellChangeCommitted={params => {
           console.log(params);
           const {
@@ -808,7 +780,9 @@ export default function DeviceDataGrid(props) {
               }
 
               // 0 would be not ok results
-              const retained = status.filter(item => item === 0);
+              const retained = Array(status.length)
+                .keys()
+                .filter(item => status[item]);
 
               fetchDataFromServer();
               setSelection(retained);
@@ -833,6 +807,8 @@ export default function DeviceDataGrid(props) {
               });
               results = (await Promise.all(results)).map(item => item | 0);
 
+              console.log(results);
+
               if (!results.every(item => item)) {
                 setAnchorEl(event.target);
               }
@@ -846,7 +822,9 @@ export default function DeviceDataGrid(props) {
               }
 
               // 0 would be not ok results
-              const retained = status.filter(item => item === 0);
+              const retained = Array(status.length)
+                .keys()
+                .filter(item => status[item]);
               // 1 would be successful deletion
               const newData = data.filter(item => status[item.id] !== 1);
               for (let i = 0; i < newData.length; i++) {
