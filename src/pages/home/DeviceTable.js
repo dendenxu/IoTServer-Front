@@ -198,16 +198,20 @@ export default function DeviceDataGrid(props) {
   };
 
   useEffect(() => {
-    const it = setTimeout(() => {
-      // for (let i = 0; i < data.length; i++) {
-      //   updateDeviceFromServer(i);
-      // }
-      fetchDataFromServer();
-    }, 1000);
+    if (!edit) {
+      const it = setTimeout(() => {
+        // for (let i = 0; i < data.length; i++) {
+        //   updateDeviceFromServer(i);
+        // }
+        fetchDataFromServer();
+      }, 1000);
 
-    return () => {
-      clearTimeout(it);
-    };
+      return () => {
+        clearTimeout(it);
+      };
+    } else {
+      return () => {};
+    }
   }, [data, edit]);
 
   // Quitely and passively fetch data from the server
@@ -811,11 +815,15 @@ export default function DeviceDataGrid(props) {
       <GridToolbarDensitySelector />
       <GridToolbarExport />
       <Button color="primary" size="small" onClick={handleRefresh}>
-        <RefreshIcon />
+        <RefreshIcon fontSize="small" />
         Refresh
       </Button>
       <Button color="primary" size="small" onClick={handleEdit}>
-        {edit ? <HighlightOffIcon /> : <EditIcon />}
+        {edit ? (
+          <HighlightOffIcon fontSize="small" />
+        ) : (
+          <EditIcon fontSize="small" />
+        )}
         {edit ? 'Quit Editting' : 'Start Editting'}
       </Button>
     </GridToolbarContainer>
