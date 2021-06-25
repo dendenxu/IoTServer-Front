@@ -472,9 +472,7 @@ export default function DeviceDataGrid(props) {
         name: row.name,
         desc: row.desc,
         type: row.type,
-        user: {
-          email,
-        },
+        email,
       });
       return result;
     } catch (err) {

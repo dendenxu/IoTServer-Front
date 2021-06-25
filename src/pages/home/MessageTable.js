@@ -139,7 +139,12 @@ export default function MessageDataGrid(props) {
   const defaultPageSize = 100;
 
   useEffect(() => {
-    localStorage.setItem('message_table_data', JSON.stringify(data));
+    try {
+      localStorage.setItem('message_table_data', JSON.stringify(data));
+    } catch (e) {
+      // console.log(e);
+      console.log("You've got too much data to store...");
+    }
   }, [data]);
 
   useEffect(() => {
@@ -147,9 +152,7 @@ export default function MessageDataGrid(props) {
   }, []);
 
   const processPayload = payload => {
-    payload.mqttId = payload.device.mqttId;
     payload.date = new Date(payload.date);
-    payload.name = payload.device.name;
   };
 
   // Quitely and passively fetch data from the server
@@ -213,13 +216,13 @@ export default function MessageDataGrid(props) {
       editable: true,
       renderCell: renderBold,
     },
-    {
-      field: 'name',
-      headerName: 'Device',
-      flex: 0.08,
-      editable: false,
-      renderCell: renderBold,
-    },
+    // {
+    //   field: 'name',
+    //   headerName: 'Device',
+    //   flex: 0.08,
+    //   editable: false,
+    //   renderCell: renderBold,
+    // },
     {
       field: 'info',
       headerName: 'Infomation',
