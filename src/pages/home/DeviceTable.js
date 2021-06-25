@@ -29,6 +29,8 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import Chip from '@material-ui/core/Chip';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import EditIcon from '@material-ui/icons/Edit';
 import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
 import Loading from '../components/LoadingMask';
@@ -75,14 +77,16 @@ const useStyles = makeStyles(theme => {
       },
       color: theme.palette.text.secondary,
       '& .MuiDataGrid-columnsContainer': {
-        border: 'none',
+        // border: 'none',
+        borderBottomColor: fade(theme.palette.light.dark, 0.5),
         color: theme.palette.text.primary,
         fontSize: '1.4rem',
         fontWeight: 'normal',
         fontFamily: 'Teko',
       },
       '& .MuiDataGrid-cell': {
-        border: 'none',
+        // border: 'none',
+        borderBottomColor: fade(theme.palette.light.dark, 0.5),
       },
       '& .MuiDataGrid-cell:focus-within': noOutline,
       '& .MuiDataGrid-columnHeader:focus-within': noOutline,
@@ -93,6 +97,9 @@ const useStyles = makeStyles(theme => {
 
     normal: {
       background: 'transparent',
+    },
+    success: {
+      background: `${fade(theme.palette.success.main, 0.1)} !important`,
     },
     error: {
       background: `${fade(theme.palette.error.main, 0.1)} !important`,
@@ -159,6 +166,7 @@ export default function DeviceDataGrid(props) {
   const [selection, setSelection] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [edit, setEdit] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('device_table_data', JSON.stringify(data));
@@ -188,6 +196,19 @@ export default function DeviceDataGrid(props) {
     // delete payload.user;
     // delete payload.lastModifiedDate;
   };
+
+  useEffect(() => {
+    const it = setTimeout(() => {
+      // for (let i = 0; i < data.length; i++) {
+      //   updateDeviceFromServer(i);
+      // }
+      fetchDataFromServer();
+    }, 1000);
+
+    return () => {
+      clearTimeout(it);
+    };
+  }, [data, edit]);
 
   // Quitely and passively fetch data from the server
   const fetchDataFromServer = async () => {
@@ -220,6 +241,11 @@ export default function DeviceDataGrid(props) {
         payload,
         ...data.slice(id + 1, data.length),
       ]);
+      // columns.forEach(column => {
+      //   console.log('Updating column: ');
+      //   console.log(column.field);
+      //   data[id][column.field] = payload[column.field];
+      // });
     }
   };
 
@@ -508,9 +534,24 @@ export default function DeviceDataGrid(props) {
     </Typography>
   );
 
+  const renderOnline = params => (
+    <Typography
+      style={{
+        fontSize: '1.1rem',
+        fontWeight: 'bold',
+        color: params.row.online
+          ? theme.palette.success.main
+          : theme.palette.error.main,
+      }}
+    >
+      {params.value}
+    </Typography>
+  );
+
   const columns = [
     {
       disableColumnMenu: true,
+      hide: !edit,
       align: 'center',
       headerAlign: 'center',
       field: 'action',
@@ -542,27 +583,27 @@ export default function DeviceDataGrid(props) {
       field: 'mqttId',
       headerName: 'MqttId',
       flex: 0.08,
-      editable: true,
+      editable: edit,
       renderCell: renderBold,
     },
     {
       field: 'name',
       headerName: 'Name',
       flex: 0.083,
-      editable: true,
+      editable: edit,
       renderCell: renderBold,
     },
     {
       field: 'desc',
       headerName: 'Description',
       flex: 0.12,
-      editable: true,
+      editable: edit,
     },
     {
       field: 'type',
       headerName: 'Device Type',
       flex: 0.13,
-      editable: true,
+      editable: edit,
       // type: 'array',
       // valueFormatter: params => params.row.type.join(', '),
       renderCell: params => renderTags(params.row.type),
@@ -605,6 +646,20 @@ export default function DeviceDataGrid(props) {
           ? 'ALERT'
           : 'NORMAL',
       renderCell: renderStatus,
+    },
+    {
+      field: 'online',
+      headerName: 'Online',
+      flex: 0.087,
+      editable: false,
+      sortable: true,
+      valueGetter: params =>
+        params.row.online === undefined
+          ? ''
+          : params.row.online
+          ? 'ONLINE'
+          : 'OFFLINE',
+      renderCell: renderOnline,
     },
     {
       field: 'statusUpdateDate',
@@ -745,6 +800,10 @@ export default function DeviceDataGrid(props) {
     setLoading(false);
   };
 
+  const handleEdit = e => {
+    setEdit(!edit);
+  };
+
   const CustomToolbar = () => (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
@@ -754,6 +813,10 @@ export default function DeviceDataGrid(props) {
       <Button color="primary" size="small" onClick={handleRefresh}>
         <RefreshIcon />
         Refresh
+      </Button>
+      <Button color="primary" size="small" onClick={handleEdit}>
+        {edit ? <HighlightOffIcon /> : <EditIcon />}
+        {edit ? 'Quit Editting' : 'Start Editting'}
       </Button>
     </GridToolbarContainer>
   );
@@ -795,6 +858,8 @@ export default function DeviceDataGrid(props) {
             return classes.modified;
           } else if (params.row.alert) {
             return classes.error;
+            // } else if (params.row.online) {
+            //   return classes.success;
           } else {
             return classes.normal;
           }
@@ -824,38 +889,42 @@ export default function DeviceDataGrid(props) {
           LoadingOverlay: CustomLoadingOverlay,
         }}
       />
-      <IoTButton
-        style={{
-          marginLeft: 16,
-          background: theme.palette.primary.main,
-        }}
-        onClick={handleAddRow}
-      >
-        Add Device
-      </IoTButton>
+      {edit && (
+        <IoTButton
+          style={{
+            marginLeft: 16,
+            background: theme.palette.primary.main,
+          }}
+          onClick={handleAddRow}
+        >
+          Add Device
+        </IoTButton>
+      )}
       {selection.length !== 0 && (
         <>
-          <IoTButton
-            style={{
-              marginLeft: 16,
-              // background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.warning.main} 70%)`,
-              background: theme.palette.warning.main,
-            }}
-            onClick={async event => {
-              console.log('Trying to perform action: ');
-              console.log(selection);
+          {edit && (
+            <IoTButton
+              style={{
+                marginLeft: 16,
+                // background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.warning.main} 70%)`,
+                background: theme.palette.warning.main,
+              }}
+              onClick={async event => {
+                console.log('Trying to perform action: ');
+                console.log(selection);
 
-              const [status, retained] = await handleSelectionAction(
-                handleDeviceAction,
-                event,
-              );
+                const [status, retained] = await handleSelectionAction(
+                  handleDeviceAction,
+                  event,
+                );
 
-              fetchDataFromServer();
-              setSelection(retained);
-            }}
-          >
-            Perform Action
-          </IoTButton>
+                fetchDataFromServer();
+                setSelection(retained);
+              }}
+            >
+              Perform Action
+            </IoTButton>
+          )}
           <IoTButton
             style={{
               marginLeft: 16,

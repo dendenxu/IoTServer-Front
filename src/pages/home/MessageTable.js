@@ -76,6 +76,7 @@ const useStyles = makeStyles(theme => {
       color: theme.palette.text.secondary,
       '& .MuiDataGrid-columnsContainer': {
         // border: 'none',
+        borderBottomColor: fade(theme.palette.light.dark, 0.5),
         color: theme.palette.text.primary,
         fontSize: '1.4rem',
         fontWeight: 'normal',
@@ -83,6 +84,7 @@ const useStyles = makeStyles(theme => {
       },
       '& .MuiDataGrid-cell': {
         // border: 'none',
+        borderBottomColor: fade(theme.palette.light.dark, 0.5),
       },
       '& .MuiDataGrid-cell:focus-within': noOutline,
       '& .MuiDataGrid-columnHeader:focus-within': noOutline,
