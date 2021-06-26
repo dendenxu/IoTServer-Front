@@ -2,7 +2,7 @@ import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import theme from './theme';
 
 export default {
-  textColor: theme.palette.primary.main,
+  textColor: theme.palette.text.hint,
   // background: theme.palette.background.widget,
   fontFamily: theme.typography.fontFamily,
   // fontFamily: 'Teko',
@@ -10,7 +10,7 @@ export default {
   tooltip: {
     container: {
       background: theme.palette.background.default,
-      fontWeight: 'bold',
+      // fontWeight: 'bold',
     },
     tableCellValue: {},
   },
@@ -29,7 +29,7 @@ export default {
   },
   grid: {
     line: {
-      stroke: fade(theme.palette.primary.main, 0.2),
+      stroke: fade(theme.palette.text.secondary, 0.2),
       strokeWidth: 3,
     },
   },
