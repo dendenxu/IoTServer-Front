@@ -6,8 +6,12 @@ import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
+import InputBase from '@material-ui/core/InputBase';
 import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import moment from 'moment';
 
 import DateFnsUtils from '@date-io/date-fns';
@@ -25,8 +29,7 @@ import {
 
 import tempBump from '../../assets/temp/tempBump';
 import chartTheme from '../../theme/chartTheme';
-
-import IoTextField from './IoTextField';
+import Loading from './LoadingMask';
 
 const useStyles = makeStyles(theme => ({
   table: {
@@ -52,6 +55,14 @@ const useStyles = makeStyles(theme => ({
 
   pickerButton: {
     background: theme.palette.background.button,
+  },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'start',
+    alignItems: 'center',
+    width: '100%',
+    paddingLeft: theme.spacing(3),
   },
 }));
 
@@ -86,7 +97,7 @@ const MyResponsiveAreaBump = ({ data /* see data tab */, theme }) => (
 );
 
 const DateTimePicker = props => {
-  const { anchorEl, setAnchorEl, date, setDate } = props;
+  const { start, anchorEl, setAnchorEl, date, setDate, ...other } = props;
   const classes = useStyles();
 
   const handlePopoverClose = () => {
@@ -106,6 +117,7 @@ const DateTimePicker = props => {
         vertical: 'top',
         horizontal: 'left',
       }}
+      {...other}
     >
       <div className={classes.picker}>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -115,7 +127,7 @@ const DateTimePicker = props => {
             format="yyyy/MM/dd"
             margin="normal"
             id="date-picker-inline"
-            label="Starting Date"
+            label={start ? 'Starting Date' : 'End Date'}
             value={date}
             onChange={newDate => {
               setDate(newDate);
@@ -129,7 +141,7 @@ const DateTimePicker = props => {
             variant="inline"
             margin="normal"
             id="time-picker"
-            label="Starting Time"
+            label={start ? 'Starting Time' : 'End Time'}
             value={date}
             onChange={newDate => {
               setDate(newDate);
@@ -145,7 +157,7 @@ const DateTimePicker = props => {
 };
 
 const DatePickerButton = props => {
-  const { date, setAnchorEl } = props;
+  const { date, setAnchorEl, ...other } = props;
 
   const classes = useStyles();
   return (
@@ -155,6 +167,7 @@ const DatePickerButton = props => {
       onClick={e => {
         setAnchorEl(e.target);
       }}
+      {...other}
     >
       {moment(date).format('yyyy-MM-DD hh:mm:ss')}
     </Button>
@@ -170,11 +183,13 @@ export default function BumpChart(props) {
   const [tick, setTick] = useState(10);
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
+  const [loadingData, setLoadingData] = useState(false);
   // const [selectedDate, setSelectedDate] = React.useState(
   //   new Date('2014-08-18T21:11:54'),
   // );
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {
+    setLoadingData(true);
     const res = await fetch(
       `/api/message/detailcount?fromMills=${fromMills}&toMills=${toMills}&tick=${tick}`,
     );
@@ -183,29 +198,24 @@ export default function BumpChart(props) {
       const body = await res.json();
       setData(body);
     }
+    setLoadingData(false);
   };
 
   useEffect(() => {
     fetchDataFromServer(from.getTime(), to.getTime(), tick);
-  }, []);
+  }, [from, to, tick]);
 
   return (
     <div {...props} className={classes.root}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-end',
-          width: '100%',
-          paddingLeft: theme.spacing(3),
-        }}
-      >
+      <div className={classes.header}>
         <Typography
           variant="h5"
           color="primary"
           style={{
             fontWeight: 'bold',
             // fontFamily: 'Teko',
+            // flexGrow: 2,
+            display: 'flex',
           }}
         >
           Device Activity
@@ -219,15 +229,68 @@ export default function BumpChart(props) {
             // fontWeight: 'bold',
             // fontFamily: 'Teko',
             marginLeft: theme.spacing(2),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+            // flexGrow: 1,
+            // flexShrink: 1,
           }}
         >
-          Area Bump Chart of your devices from{` `}
-          <DatePickerButton date={from} setAnchorEl={setFromAnchorEl} />
+          Device activity rank from{` `}
+          <DatePickerButton
+            date={from}
+            setAnchorEl={setFromAnchorEl}
+            style={{
+              marginLeft: theme.spacing(1),
+            }}
+          />
           {` `}to{` `}
-          <DatePickerButton date={to} setAnchorEl={setToAnchorEl} />
+          <DatePickerButton
+            date={to}
+            setAnchorEl={setToAnchorEl}
+            style={{
+              marginLeft: theme.spacing(1),
+            }}
+          />
+          {` `}resolution: {` `}
+          <div
+            style={{
+              width: 64,
+              // border: '1px solid',
+              // borderColor: theme.palette.text.secondary,
+              borderRadius: 10,
+              background: theme.palette.background.button,
+              paddingLeft: theme.spacing(1),
+              marginLeft: theme.spacing(1),
+            }}
+          >
+            <InputBase
+              label="Resolution"
+              id="outlined-size-small"
+              defaultValue="Small"
+              variant="outlined"
+              size="small"
+              type="number"
+              value={tick}
+              onChange={e => {
+                setTick(e.target.value);
+              }}
+            />
+          </div>
+          {loadingData && (
+            <CircularProgress
+              style={{
+                width: 24,
+                height: '70%',
+                marginLeft: theme.spacing(1),
+              }}
+              // size={12}
+            />
+          )}
         </Typography>
 
         <DateTimePicker
+          start
           anchorEl={fromAnchorEl}
           setAnchorEl={setFromAnchorEl}
           date={from}
@@ -239,20 +302,6 @@ export default function BumpChart(props) {
           date={to}
           setDate={setTo}
         />
-
-        {/* <IoTextField
-          variant="outlined"
-          size="medium"
-          id="username_input_field"
-          name="username"
-          style={{
-            width: '20%',
-          }}
-        /> */}
-
-        {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
-
-        </MuiPickersUtilsProvider> */}
       </div>
 
       <div className={classes.table}>

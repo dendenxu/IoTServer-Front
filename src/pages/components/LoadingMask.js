@@ -4,7 +4,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 
 export default function Loading(props) {
-  const { loadingData } = props;
+  const { loadingData, scaling = 1 } = props;
 
   return (
     <>
@@ -22,7 +22,7 @@ export default function Loading(props) {
           zIndex={21}
         >
           {/* <LinearProgress /> */}
-          <CircularProgress size={68} thickness={5.2} />
+          <CircularProgress size={68 * scaling} thickness={5.2 * scaling} />
         </Box>
       )}
       {loadingData && (

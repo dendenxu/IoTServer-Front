@@ -141,8 +141,9 @@ function Home(props) {
             style={{
               display: 'flex',
               width: '100%',
-              minHeight: 200,
-              maxHeight: 640,
+              // minHeight: 200,
+              // maxHeight: 380,
+              height: 400,
             }}
           >
             <BumpChart />
