@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     alignItems: 'center',
     background: theme.palette.background.widget,
-    margin: theme.spacing(3),
+    margin: theme.spacing(3, 1.5, 1.5, 1.5),
     padding: theme.spacing(2, 0, 0),
     borderRadius: '32px',
     // minWidth: 320,

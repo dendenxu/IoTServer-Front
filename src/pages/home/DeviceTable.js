@@ -58,7 +58,7 @@ const useStyles = makeStyles(theme => {
 
     table: {
       borderRadius: '32px',
-      margin: theme.spacing(3),
+      margin: theme.spacing(1.5, 3, 3, 3),
       padding: theme.spacing(2, 3, 4),
       background: theme.palette.background.widget,
     },
