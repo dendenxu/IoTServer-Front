@@ -7,6 +7,9 @@ import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
 import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
+import RefreshIcon from '@material-ui/icons/Refresh';
+
 import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -74,7 +77,7 @@ const MyResponsiveAreaBump = ({ data /* see data tab */, theme }) => (
     align="end"
     colors={{ scheme: 'set3' }}
     blendMode="normal"
-    fillOpacity={0.5}
+    fillOpacity={0.7}
     activeFillOpacity={0.85}
     // spacing={4}
     xPadding={0.6}
@@ -122,7 +125,7 @@ const DateTimePicker = props => {
       <div className={classes.picker}>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <KeyboardDatePicker
-            disableToolbar
+            // disableToolbar
             variant="inline"
             format="yyyy/MM/dd"
             margin="normal"
@@ -137,7 +140,7 @@ const DateTimePicker = props => {
             }}
           />
           <KeyboardTimePicker
-            disableToolbar
+            // disableToolbar
             variant="inline"
             margin="normal"
             id="time-picker"
@@ -162,7 +165,7 @@ const DatePickerButton = props => {
   const classes = useStyles();
   return (
     <Button
-      variant="outlined"
+      // variant="outlined"
       className={classes.pickerButton}
       onClick={e => {
         setAnchorEl(e.target);
@@ -184,6 +187,7 @@ export default function BumpChart(props) {
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
   // const [selectedDate, setSelectedDate] = React.useState(
   //   new Date('2014-08-18T21:11:54'),
   // );
@@ -199,11 +203,20 @@ export default function BumpChart(props) {
       setData(body);
     }
     setLoadingData(false);
+    setNeedRefresh(false);
   };
 
   useEffect(() => {
     fetchDataFromServer(from.getTime(), to.getTime(), tick);
+  }, []);
+
+  useEffect(() => {
+    setNeedRefresh(true);
   }, [from, to, tick]);
+
+  const handleRefresh = () => {
+    fetchDataFromServer(from.getTime(), to.getTime(), tick);
+  };
 
   return (
     <div {...props} className={classes.root}>
@@ -242,6 +255,7 @@ export default function BumpChart(props) {
             setAnchorEl={setFromAnchorEl}
             style={{
               marginLeft: theme.spacing(1),
+              marginRight: theme.spacing(1),
             }}
           />
           {` `}to{` `}
@@ -250,6 +264,7 @@ export default function BumpChart(props) {
             setAnchorEl={setToAnchorEl}
             style={{
               marginLeft: theme.spacing(1),
+              marginRight: theme.spacing(1),
             }}
           />
           {` `}resolution: {` `}
@@ -262,6 +277,7 @@ export default function BumpChart(props) {
               background: theme.palette.background.button,
               paddingLeft: theme.spacing(1),
               marginLeft: theme.spacing(1),
+              marginRight: theme.spacing(1),
             }}
           >
             <InputBase
@@ -277,6 +293,19 @@ export default function BumpChart(props) {
               }}
             />
           </div>
+          <IconButton
+            aria-label="search"
+            onClick={handleRefresh}
+            size="small"
+            style={{
+              marginRight: theme.spacing(1),
+            }}
+          >
+            <RefreshIcon
+              color={needRefresh ? 'primary' : 'default'}
+              // fontSize="small"
+            />
+          </IconButton>
           {loadingData && (
             <CircularProgress
               style={{
