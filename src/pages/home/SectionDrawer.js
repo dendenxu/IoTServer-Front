@@ -100,9 +100,9 @@ export default function SectionDrawer(props) {
       style={{
         ...style,
       }}
-      classes={{
-        paper: classes.drawerPaper,
-      }}
+      // classes={{
+      //   paper: classes.drawerPaper,
+      // }}
       {...other}
     >
       <Toolbar />

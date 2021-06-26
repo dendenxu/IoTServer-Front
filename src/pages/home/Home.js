@@ -9,7 +9,7 @@ import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory, useLocation } from 'react-router-dom';
 import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
@@ -20,6 +20,7 @@ import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
+import BumpChart from '../components/BumpChart';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
 import DeviceTable from './DeviceTable';
@@ -133,7 +134,8 @@ function Home(props) {
         <SectionDrawer />
         <div className={classes.content}>
           <Toolbar />
-          <MessageTable email={email} />
+          {/* <MessageTable email={email} /> */}
+          <BumpChart />
           <DeviceTable email={email} />
         </div>
       </div>

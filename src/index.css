@@ -39,6 +39,8 @@ html {
 body {
   scrollbar-width: thin;
   scrollbar-color: var(--thumbBG) var(--scrollbarBG);
+  background: rgb(29, 38, 43);
+  color: rgb(222, 229, 236);
 }
 
 ::-webkit-scrollbar-corner {
