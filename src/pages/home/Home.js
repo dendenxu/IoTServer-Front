@@ -20,6 +20,7 @@ import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
+import PieChart from '../components/PieChart';
 import BumpChart from '../components/BumpChart';
 import FunnelChart from '../components/FunnelChart';
 import SearchAppBar from './SearchAppBar';
@@ -141,11 +142,12 @@ function Home(props) {
               display: 'flex',
               width: '100%',
               minHeight: 200,
-              maxHeight: 512,
+              maxHeight: 640,
             }}
           >
             <BumpChart />
             <FunnelChart />
+            <PieChart />
           </div>
 
           <DeviceTable email={email} />

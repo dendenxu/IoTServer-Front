@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 0, 0),
     borderRadius: '32px',
     minWidth: 320,
-    width: '60%',
+    width: '50%',
   },
 }));
 
@@ -40,13 +40,14 @@ const MyResponsiveAreaBump = ({ data /* see data tab */, theme }) => (
     margin={{ top: 82, right: 160, bottom: 32, left: 120 }}
     align="end"
     colors={{ scheme: 'set3' }}
-    fillOpacity={0.6}
+    blendMode="normal"
+    fillOpacity={0.75}
     activeFillOpacity={0.85}
-    spacing={8}
+    // spacing={4}
     xPadding={0.6}
     borderWidth={3}
     activeBorderWidth={6}
-    borderColor={{ from: 'color', modifiers: [['darker', '2.2']] }}
+    borderColor={{ from: 'color', modifiers: [['darker', '1.8']] }}
     startLabel="id"
     startLabelTextColor={{ from: 'color', modifiers: [['brighter', '1.0']] }}
     endLabelTextColor={{ from: 'color', modifiers: [['brighter', '1.0']] }}

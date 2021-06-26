@@ -1,6 +1,6 @@
 // install (please make sure versions match peerDependencies)
 // yarn add @nivo/core @nivo/funnel
-import { ResponsiveFunnel } from '@nivo/funnel';
+import { ResponsivePie } from '@nivo/pie';
 import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 // website examples showcase many properties,
 // you'll often use just a few of them.
 
-import tempFunnel from '../../assets/temp/tempFunnel';
+import tempPie from '../../assets/temp/tempPie';
 import chartTheme from '../../theme/chartTheme';
 
 const useStyles = makeStyles(theme => ({
@@ -28,34 +28,55 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(3),
     padding: theme.spacing(2, 0, 0),
     borderRadius: '32px',
-    // minWidth: 320,
-    width: '16%',
+    minWidth: 320,
+    width: '24%',
   },
 }));
 
-const MyResponsiveFunnel = ({ data /* see data tab */, theme }) => (
-  <ResponsiveFunnel
+const MyResponsivePie = ({ data /* see data tab */, theme }) => (
+  <ResponsivePie
     theme={theme}
     data={data}
-    direction="horizontal"
-    margin={{ top: 20, right: 40, bottom: 20, left: 40 }}
-    valueFormat=">-.0s"
-    colors={{ scheme: 'spectral' }}
-    borderWidth={20}
-    labelColor={{ from: 'color', modifiers: [['darker', 3]] }}
-    beforeSeparatorLength={20}
-    beforeSeparatorOffset={20}
-    afterSeparatorLength={20}
-    afterSeparatorOffset={20}
-    currentPartSizeExtension={10}
-    currentBorderWidth={40}
-    motionConfig="wobbly"
+    margin={{ top: 40, right: 90, bottom: 40, left: 90 }}
+    startAngle={-180}
+    endAngle={360}
+    sortByValue
+    innerRadius={0.6}
+    padAngle={5}
+    cornerRadius={16}
+    activeOuterRadiusOffset={8}
+    arcLinkLabelsDiagonalLength={10}
+    arcLinkLabelsStraightLength={16}
+    arcLinkLabelsTextOffset={2}
+    arcLinkLabelsThickness={2}
+    arcLinkLabelsTextColor={{ from: 'color', modifiers: [['brighter', '0']] }}
+    colors={{ scheme: 'set3' }}
+    borderWidth={5}
+    borderColor={{ from: 'color', modifiers: [['darker', '1.2']] }}
+    // arcLinkLabelsTextColor="#333333"
+    arcLinkLabelsColor={{ from: 'color', modifiers: [] }}
+    arcLabelsSkipAngle={12}
+    arcLabelsTextColor={{ from: 'color', modifiers: [['darker', '2.4']] }}
+    // legends={[
+    //   {
+    //     anchor: 'bottom-right',
+    //     direction: 'column',
+    //     justify: false,
+    //     translateX: 0,
+    //     translateY: 0,
+    //     itemWidth: 40,
+    //     itemHeight: 20,
+    //     itemsSpacing: 0,
+    //     symbolSize: 14,
+    //     itemDirection: 'left-to-right',
+    //   },
+    // ]}
   />
 );
 
 export default function FunnelChart(props) {
   const classes = useStyles();
-  const [data, setData] = useState(tempFunnel);
+  const [data, setData] = useState(tempPie);
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {
     // const res = await fetch(
@@ -81,10 +102,10 @@ export default function FunnelChart(props) {
           // fontFamily: 'Teko',
         }}
       >
-        Device FunnelChart
+        Device PieChart
       </Typography>
       <div className={classes.table}>
-        <MyResponsiveFunnel data={data} theme={chartTheme} />
+        <MyResponsivePie data={data} theme={chartTheme} />
       </div>
     </div>
   );
