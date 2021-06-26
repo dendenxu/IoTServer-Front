@@ -1,6 +1,6 @@
 // install (please make sure versions match peerDependencies)
-// yarn add @nivo/core @nivo/bump
-import { ResponsiveAreaBump } from '@nivo/bump';
+// yarn add @nivo/core @nivo/funnel
+import { ResponsiveFunnel } from '@nivo/funnel';
 import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 // website examples showcase many properties,
 // you'll often use just a few of them.
 
-import tempBump from '../../assets/temp/tempBump';
+import tempFunnel from '../../assets/temp/tempFunnel';
 import chartTheme from '../../theme/chartTheme';
 
 const useStyles = makeStyles(theme => ({
@@ -29,52 +29,41 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 0, 0),
     borderRadius: '32px',
     minWidth: 320,
-    width: '60%',
+    width: '40%',
   },
 }));
 
-const MyResponsiveAreaBump = ({ data /* see data tab */, theme }) => (
-  <ResponsiveAreaBump
+const MyResponsiveFunnel = ({ data /* see data tab */, theme }) => (
+  <ResponsiveFunnel
     theme={theme}
     data={data}
-    margin={{ top: 82, right: 160, bottom: 32, left: 120 }}
-    align="end"
-    colors={{ scheme: 'set3' }}
-    fillOpacity={0.6}
-    activeFillOpacity={0.85}
-    spacing={8}
-    xPadding={0.6}
-    borderWidth={3}
-    activeBorderWidth={6}
-    borderColor={{ from: 'color', modifiers: [['darker', '2.2']] }}
-    startLabel="id"
-    startLabelTextColor={{ from: 'color', modifiers: [['brighter', '1.0']] }}
-    endLabelTextColor={{ from: 'color', modifiers: [['brighter', '1.0']] }}
-    axisTop={{
-      tickSize: 5,
-      tickPadding: 5,
-      tickRotation: -20,
-      legend: '',
-      legendPosition: 'middle',
-      legendOffset: -36,
-    }}
-    axisBottom={null}
+    margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+    valueFormat=">-.4s"
+    colors={{ scheme: 'spectral' }}
+    borderWidth={20}
+    labelColor={{ from: 'color', modifiers: [['darker', 3]] }}
+    beforeSeparatorLength={100}
+    beforeSeparatorOffset={20}
+    afterSeparatorLength={100}
+    afterSeparatorOffset={20}
+    currentPartSizeExtension={10}
+    currentBorderWidth={40}
+    motionConfig="wobbly"
   />
 );
 
 export default function BumpChart(props) {
   const classes = useStyles();
-  const [data, setData] = useState(tempBump);
+  const [data, setData] = useState(tempFunnel);
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {
-    const res = await fetch(
-      `/api/message/detailcount?fromMills=${fromMills}&toMills=${toMills}&tick=${tick}`,
-    );
-
-    if (res.ok) {
-      const body = await res.json();
-      setData(body);
-    }
+    // const res = await fetch(
+    //   `/api/message/detailcount?fromMills=${fromMills}&toMills=${toMills}&tick=${tick}`,
+    // );
+    // if (res.ok) {
+    //   const body = await res.json();
+    //   setData(body);
+    // }
   };
 
   useEffect(() => {
@@ -91,10 +80,10 @@ export default function BumpChart(props) {
           // fontFamily: 'Teko',
         }}
       >
-        Device BumpChart
+        Device FunnelChart
       </Typography>
       <div className={classes.table}>
-        <MyResponsiveAreaBump data={data} theme={chartTheme} />
+        <MyResponsiveFunnel data={data} theme={chartTheme} />
       </div>
     </div>
   );

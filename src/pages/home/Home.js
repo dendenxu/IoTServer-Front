@@ -21,6 +21,7 @@ import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
 import BumpChart from '../components/BumpChart';
+import FunnelChart from '../components/FunnelChart';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
 import DeviceTable from './DeviceTable';
@@ -135,7 +136,18 @@ function Home(props) {
         <div className={classes.content}>
           <Toolbar />
           {/* <MessageTable email={email} /> */}
-          <BumpChart />
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              minHeight: 200,
+              maxHeight: 512,
+            }}
+          >
+            <BumpChart />
+            <FunnelChart />
+          </div>
+
           <DeviceTable email={email} />
         </div>
       </div>

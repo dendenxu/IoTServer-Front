@@ -1877,6 +1877,15 @@
   resolved "https://registry.yarnpkg.com/@miragejs/pretender-node-polyfill/-/pretender-node-polyfill-0.1.2.tgz#d26b6b7483fb70cd62189d05c95d2f67153e43f2"
   integrity sha512-M/BexG/p05C5lFfMunxo/QcgIJnMT2vDVCd00wNqK2ImZONIlEETZwWJu1QtLxtmYlSHlCFl3JNzp0tLe7OJ5g==
 
+"@nivo/annotations@0.71.0":
+  version "0.71.0"
+  resolved "https://registry.yarnpkg.com/@nivo/annotations/-/annotations-0.71.0.tgz#1fdda5c22ec5e05bbe89beefab6bf83030220fb5"
+  integrity sha512-/72r7DmHJeisYTfX+xIiDefPN05N/ItW3HvPO1niTYH2xlnhnStlkAU9pvbRH2Nlxv01/nZWgtv9zJFQ/RW6uw==
+  dependencies:
+    "@nivo/colors" "0.71.0"
+    "@react-spring/web" "9.2.0"
+    lodash "^4.17.21"
+
 "@nivo/axes@0.71.0":
   version "0.71.0"
   resolved "https://registry.yarnpkg.com/@nivo/axes/-/axes-0.71.0.tgz#f22b716e350a089158a552dadc3afbeace9ac515"
@@ -1928,6 +1937,18 @@
     d3-time-format "^3.0.0"
     lodash "^4.17.21"
     resize-observer-polyfill "^1.5.1"
+
+"@nivo/funnel@^0.71.0":
+  version "0.71.0"
+  resolved "https://registry.yarnpkg.com/@nivo/funnel/-/funnel-0.71.0.tgz#70c34daab26282ff12ffe9d38f03bd89ff9fa1b0"
+  integrity sha512-A+IB1Cto+S+W76Cxum30sgV55Dhdrrd53GRGbKpaN/2TbQJsobqOkEGakNr1YO5p+YeResPcQz/L1yrG4+uczA==
+  dependencies:
+    "@nivo/annotations" "0.71.0"
+    "@nivo/colors" "0.71.0"
+    "@nivo/tooltip" "0.71.0"
+    "@react-spring/web" "9.2.0"
+    d3-scale "^3.2.3"
+    d3-shape "^1.3.5"
 
 "@nivo/legends@0.71.0":
   version "0.71.0"
