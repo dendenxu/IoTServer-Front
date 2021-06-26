@@ -81,7 +81,7 @@ export default function FunnelChart(props) {
           // fontFamily: 'Teko',
         }}
       >
-        Device FunnelChart
+        Online/Alert
       </Typography>
       <div className={classes.table}>
         <MyResponsiveFunnel data={data} theme={chartTheme} />

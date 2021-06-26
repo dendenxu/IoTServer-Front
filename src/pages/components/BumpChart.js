@@ -1,6 +1,4 @@
 /* eslint-disable no-shadow */
-// install (please make sure versions match peerDependencies)
-// yarn add @nivo/core @nivo/bump
 import { ResponsiveAreaBump } from '@nivo/bump';
 import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
@@ -23,12 +21,6 @@ import {
   KeyboardDatePicker,
   KeyboardTimePicker,
 } from '@material-ui/pickers';
-
-// make sure parent container have a defined height when using
-// responsive component, otherwise height will be 0 and
-// no chart will be rendered.
-// website examples showcase many properties,
-// you'll often use just a few of them.
 
 import tempBump from '../../assets/temp/tempBump';
 import chartTheme from '../../theme/chartTheme';
@@ -66,6 +58,42 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     width: '100%',
     paddingLeft: theme.spacing(3),
+  },
+
+  headerTitle: {
+    fontWeight: 'bold',
+    display: 'flex',
+  },
+
+  headerDetail: {
+    color: theme.palette.text.secondary,
+    marginLeft: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'end',
+  },
+
+  headerDetailElement: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+
+  resolutionInputWrapper: {
+    width: 64,
+    borderRadius: 10,
+    background: theme.palette.background.button,
+    paddingLeft: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+
+  refreshButton: {
+    marginRight: theme.spacing(1),
+  },
+
+  refreshIndicator: {
+    height: '70%',
+    marginLeft: theme.spacing(1),
   },
 }));
 
@@ -188,9 +216,6 @@ export default function BumpChart(props) {
   const [toAnchorEl, setToAnchorEl] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
   const [needRefresh, setNeedRefresh] = useState(false);
-  // const [selectedDate, setSelectedDate] = React.useState(
-  //   new Date('2014-08-18T21:11:54'),
-  // );
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {
     setLoadingData(true);
@@ -224,62 +249,26 @@ export default function BumpChart(props) {
         <Typography
           variant="h5"
           color="primary"
-          style={{
-            fontWeight: 'bold',
-            // fontFamily: 'Teko',
-            // flexGrow: 2,
-            display: 'flex',
-          }}
+          className={classes.headerTitle}
         >
           Device Activity
         </Typography>
 
-        <Typography
-          variant="body1"
-          // color="seondary"
-          style={{
-            color: theme.palette.text.secondary,
-            // fontWeight: 'bold',
-            // fontFamily: 'Teko',
-            marginLeft: theme.spacing(2),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'end',
-            // flexGrow: 1,
-            // flexShrink: 1,
-          }}
-        >
+        <Typography variant="body1" className={classes.headerDetail}>
           Device activity rank from{` `}
           <DatePickerButton
             date={from}
             setAnchorEl={setFromAnchorEl}
-            style={{
-              marginLeft: theme.spacing(1),
-              marginRight: theme.spacing(1),
-            }}
+            className={classes.headerDetailElement}
           />
           {` `}to{` `}
           <DatePickerButton
             date={to}
             setAnchorEl={setToAnchorEl}
-            style={{
-              marginLeft: theme.spacing(1),
-              marginRight: theme.spacing(1),
-            }}
+            className={classes.headerDetailElement}
           />
           {` `}resolution: {` `}
-          <div
-            style={{
-              width: 64,
-              // border: '1px solid',
-              // borderColor: theme.palette.text.secondary,
-              borderRadius: 10,
-              background: theme.palette.background.button,
-              paddingLeft: theme.spacing(1),
-              marginLeft: theme.spacing(1),
-              marginRight: theme.spacing(1),
-            }}
-          >
+          <div className={classes.resolutionInputWrapper}>
             <InputBase
               label="Resolution"
               id="outlined-size-small"
@@ -297,24 +286,12 @@ export default function BumpChart(props) {
             aria-label="search"
             onClick={handleRefresh}
             size="small"
-            style={{
-              marginRight: theme.spacing(1),
-            }}
+            className={classes.refreshButton}
           >
-            <RefreshIcon
-              color={needRefresh ? 'primary' : 'default'}
-              // fontSize="small"
-            />
+            <RefreshIcon color={needRefresh ? 'primary' : 'default'} />
           </IconButton>
           {loadingData && (
-            <CircularProgress
-              style={{
-                width: 24,
-                height: '70%',
-                marginLeft: theme.spacing(1),
-              }}
-              // size={12}
-            />
+            <CircularProgress className={classes.refreshIndicator} size={24} />
           )}
         </Typography>
 

@@ -60,6 +60,10 @@ function Home(props) {
   const [email, setEmail] = useState(location.state && location.state.email);
   const [loadingData, setLoadingData] = useState(true);
 
+  const [data, setData] = useState(
+    JSON.parse(localStorage.getItem('device_table_data')) || [],
+  );
+
   const handleRefresh = e => {
     // e.preventDefault();
     setLoadingData(true);
@@ -151,7 +155,7 @@ function Home(props) {
             <PieChart />
           </div>
 
-          <DeviceTable email={email} />
+          <DeviceTable email={email} data={data} setData={setData} />
         </div>
       </div>
     </div>

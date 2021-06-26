@@ -157,12 +157,10 @@ const TableButton = props => {
 };
 
 export default function DeviceDataGrid(props) {
-  const { email } = props;
+  const { email, data, setData } = props;
   const theme = useTheme();
   const classes = useStyles();
-  const [data, setData] = useState(
-    JSON.parse(localStorage.getItem('device_table_data')) || [],
-  );
+
   const [selection, setSelection] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
