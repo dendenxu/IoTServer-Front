@@ -27,6 +27,7 @@ import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
 import DeviceTable from '../components/DeviceTable';
 import MessageTable from './MessageTable';
+import GoogleMap from '../components/GoogleMap';
 
 const useStyles = makeStyles(theme => ({
   growWidth: {
@@ -49,6 +50,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const IndexedWrapper = props => {
+  const { index, selected, ...other } = props;
+  return <>{index === selected && props.children}</>;
+};
+
 function Home(props) {
   const { width } = props;
 
@@ -59,6 +65,7 @@ function Home(props) {
   const [countDown, setCountDown] = useState(5);
   const [email, setEmail] = useState(location.state && location.state.email);
   const [loadingData, setLoadingData] = useState(true);
+  const [selected, setSelected] = useState(1);
 
   const [deviceData, setDeviceData] = useState(
     JSON.parse(localStorage.getItem('device_table_data')) || [],
@@ -137,29 +144,33 @@ function Home(props) {
           display: 'flex',
         }}
       >
-        <SectionDrawer />
+        <SectionDrawer selected={selected} setSelected={setSelected} />
         <div className={classes.content}>
           <Toolbar />
           {/* <MessageTable email={email} /> */}
-          <div
-            style={{
-              display: 'flex',
-              width: '100%',
-              // minHeight: 200,
-              // maxHeight: 380,
-              height: 400,
-            }}
-          >
-            <BumpChart />
-            <FunnelChart data={deviceData} />
-            <PieChart />
-          </div>
 
-          <DeviceTable
-            email={email}
-            data={deviceData}
-            setData={setDeviceData}
-          />
+          <IndexedWrapper index={0} selected={selected}>
+            <div
+              style={{
+                display: 'flex',
+                width: '100%',
+                minHeight: 400,
+              }}
+            >
+              <BumpChart />
+              <FunnelChart data={deviceData} />
+              <PieChart />
+            </div>
+
+            <DeviceTable
+              email={email}
+              data={deviceData}
+              setData={setDeviceData}
+            />
+          </IndexedWrapper>
+          <IndexedWrapper index={1} selected={selected}>
+            <GoogleMap />
+          </IndexedWrapper>
         </div>
       </div>
     </div>

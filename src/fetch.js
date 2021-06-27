@@ -11,12 +11,18 @@ export default function decorateFetch(origin, protocol) {
   }
   const baseUrl = `${protocol}://${origin}`;
   global.fetch = (url, options) => {
-    const finalUrl = baseUrl + url;
-    const finalOptions = options || { headers: {} }; // getting a reference
-    finalOptions.credentials = 'include';
+    const doNotTamper = url.startsWith('https') || url.startsWith('http');
 
-    console.warn(`Apply base url: ${url}, result: ${finalUrl}`);
-    console.warn(`Modifying credentials to: include`);
-    return global.originalFetch(finalUrl, finalOptions);
+    if (!doNotTamper) {
+      const finalUrl = baseUrl + url;
+      const finalOptions = options || { headers: {} }; // getting a reference
+      finalOptions.credentials = 'include';
+
+      console.warn(`Apply base url: ${url}, result: ${finalUrl}`);
+      console.warn(`Modifying credentials to: include`);
+      return global.originalFetch(finalUrl, finalOptions);
+    } else {
+      return global.originalFetch(url, options);
+    }
   };
 }

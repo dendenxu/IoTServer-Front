@@ -91,7 +91,7 @@ export default function SectionDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
 
-  const { style, className, ...other } = props;
+  const { style, className, selecled, setSelected, ...other } = props;
 
   return (
     <div
@@ -100,16 +100,19 @@ export default function SectionDrawer(props) {
       style={{
         ...style,
       }}
-      // classes={{
-      //   paper: classes.drawerPaper,
-      // }}
       {...other}
     >
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListButton text={text} key={text}>
+            <ListButton
+              text={text}
+              key={text}
+              onClick={() => {
+                setSelected(index);
+              }}
+            >
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListButton>
           ))}
