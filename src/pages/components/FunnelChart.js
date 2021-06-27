@@ -53,23 +53,39 @@ const MyResponsiveFunnel = ({ data /* see data tab */, theme }) => (
   />
 );
 
+const extractFunnelData = data => {
+  const deviceCount = data.length;
+  const onlineCount = data.filter(d => d.online).length;
+  const alertCount = data.filter(d => d.alert).length;
+  return [
+    {
+      id: 'Total Count',
+      label: 'Total Count',
+      value: deviceCount,
+    },
+    {
+      id: 'Online Count',
+      label: 'Online Count',
+      value: onlineCount,
+    },
+    {
+      id: 'Alert Count',
+      label: 'Alert Count',
+      value: alertCount,
+    },
+  ];
+};
+
 export default function FunnelChart(props) {
   const classes = useStyles();
-  const [data, setData] = useState(tempFunnel);
 
-  const fetchDataFromServer = async (fromMills, toMills, tick) => {
-    // const res = await fetch(
-    //   `/api/message/detailcount?fromMills=${fromMills}&toMills=${toMills}&tick=${tick}`,
-    // );
-    // if (res.ok) {
-    //   const body = await res.json();
-    //   setData(body);
-    // }
-  };
+  let { data, setData } = props;
 
-  useEffect(() => {
-    fetchDataFromServer(1624666885920, 1624673885920, 10);
-  }, []);
+  const [innerData, innerSetData] = useState(tempFunnel);
+
+  if (!data) {
+    [data, setData] = [innerData, innerSetData];
+  }
 
   return (
     <div {...props} className={classes.root}>
@@ -84,7 +100,7 @@ export default function FunnelChart(props) {
         Online/Alert
       </Typography>
       <div className={classes.table}>
-        <MyResponsiveFunnel data={data} theme={chartTheme} />
+        <MyResponsiveFunnel data={extractFunnelData(data)} theme={chartTheme} />
       </div>
     </div>
   );

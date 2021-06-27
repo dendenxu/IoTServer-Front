@@ -25,7 +25,7 @@ import BumpChart from '../components/BumpChart';
 import FunnelChart from '../components/FunnelChart';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
-import DeviceTable from './DeviceTable';
+import DeviceTable from '../components/DeviceTable';
 import MessageTable from './MessageTable';
 
 const useStyles = makeStyles(theme => ({
@@ -60,7 +60,7 @@ function Home(props) {
   const [email, setEmail] = useState(location.state && location.state.email);
   const [loadingData, setLoadingData] = useState(true);
 
-  const [data, setData] = useState(
+  const [deviceData, setDeviceData] = useState(
     JSON.parse(localStorage.getItem('device_table_data')) || [],
   );
 
@@ -151,11 +151,15 @@ function Home(props) {
             }}
           >
             <BumpChart />
-            <FunnelChart />
+            <FunnelChart data={deviceData} />
             <PieChart />
           </div>
 
-          <DeviceTable email={email} data={data} setData={setData} />
+          <DeviceTable
+            email={email}
+            data={deviceData}
+            setData={setDeviceData}
+          />
         </div>
       </div>
     </div>

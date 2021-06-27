@@ -209,13 +209,15 @@ export default function BumpChart(props) {
   const theme = useTheme();
   const classes = useStyles();
   const [data, setData] = useState(tempBump);
-  const [from, setFrom] = useState(new Date(1624666885920));
-  const [to, setTo] = useState(new Date(1624673885920));
-  const [tick, setTick] = useState(10);
+
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
   const [needRefresh, setNeedRefresh] = useState(false);
+
+  const [from, setFrom] = useState(new Date(1624666885920));
+  const [to, setTo] = useState(new Date(1624673885920));
+  const [tick, setTick] = useState(10);
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {
     setLoadingData(true);
@@ -232,10 +234,24 @@ export default function BumpChart(props) {
   };
 
   useEffect(() => {
+    if (!needRefresh) {
+      const it = setTimeout(() => {
+        fetchDataFromServer(from.getTime(), to.getTime(), tick);
+      }, 1000);
+
+      return () => {
+        clearTimeout(it);
+      };
+    }
+    return () => {};
+  }, [data, from, to, tick, needRefresh]);
+
+  useEffect(() => {
     fetchDataFromServer(from.getTime(), to.getTime(), tick);
   }, []);
 
   useEffect(() => {
+    // we'd like the user to click refresh manually since it might introduce too much load if not
     setNeedRefresh(true);
   }, [from, to, tick]);
 
@@ -272,7 +288,6 @@ export default function BumpChart(props) {
             <InputBase
               label="Resolution"
               id="outlined-size-small"
-              defaultValue="Small"
               variant="outlined"
               size="small"
               type="number"
@@ -288,7 +303,13 @@ export default function BumpChart(props) {
             size="small"
             className={classes.refreshButton}
           >
-            <RefreshIcon color={needRefresh ? 'primary' : 'default'} />
+            <RefreshIcon
+              style={{
+                color: needRefresh
+                  ? theme.palette.warning.main
+                  : theme.palette.primary.main,
+              }}
+            />
           </IconButton>
           {loadingData && (
             <CircularProgress className={classes.refreshIndicator} size={24} />

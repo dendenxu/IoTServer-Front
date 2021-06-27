@@ -4,6 +4,9 @@ import { ResponsivePie } from '@nivo/pie';
 import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // make sure parent container have a defined height when using
 // responsive component, otherwise height will be 0 and
@@ -31,6 +34,28 @@ const useStyles = makeStyles(theme => ({
     minWidth: 320,
     width: '24%',
   },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'start',
+    alignItems: 'center',
+    width: '100%',
+    paddingLeft: theme.spacing(3),
+  },
+
+  headerTitle: {
+    fontWeight: 'bold',
+    display: 'flex',
+  },
+
+  refreshButton: {
+    marginRight: theme.spacing(1),
+  },
+
+  refreshIndicator: {
+    height: '70%',
+    marginLeft: theme.spacing(1),
+  },
 }));
 
 const MyResponsivePie = ({ data /* see data tab */, theme }) => (
@@ -46,64 +71,78 @@ const MyResponsivePie = ({ data /* see data tab */, theme }) => (
     cornerRadius={16}
     activeOuterRadiusOffset={8}
     arcLinkLabelsDiagonalLength={10}
-    arcLinkLabelsStraightLength={16}
+    arcLinkLabelsStraightLength={10}
     arcLinkLabelsTextOffset={2}
     arcLinkLabelsThickness={2}
     arcLinkLabelsTextColor={{ from: 'color', modifiers: [['brighter', '0']] }}
     colors={{ scheme: 'set3' }}
     borderWidth={5}
     borderColor={{ from: 'color', modifiers: [['darker', '1.2']] }}
-    // arcLinkLabelsTextColor="#333333"
     arcLinkLabelsColor={{ from: 'color', modifiers: [] }}
     arcLabelsSkipAngle={12}
     arcLabelsTextColor={{ from: 'color', modifiers: [['darker', '2.4']] }}
-    // legends={[
-    //   {
-    //     anchor: 'bottom-right',
-    //     direction: 'column',
-    //     justify: false,
-    //     translateX: 0,
-    //     translateY: 0,
-    //     itemWidth: 40,
-    //     itemHeight: 20,
-    //     itemsSpacing: 0,
-    //     symbolSize: 14,
-    //     itemDirection: 'left-to-right',
-    //   },
-    // ]}
   />
 );
 
-export default function FunnelChart(props) {
+export default function PieChart(props) {
   const classes = useStyles();
   const [data, setData] = useState(tempPie);
+  const [loadingData, setLoadingData] = useState(false);
 
-  const fetchDataFromServer = async (fromMills, toMills, tick) => {
-    // const res = await fetch(
-    //   `/api/message/detailcount?fromMills=${fromMills}&toMills=${toMills}&tick=${tick}`,
-    // );
-    // if (res.ok) {
-    //   const body = await res.json();
-    //   setData(body);
-    // }
+  const fetchDataFromServer = async () => {
+    setLoadingData(true);
+
+    const res = await fetch('/api/message/count?aggregate=true');
+
+    if (res.ok) {
+      const body = await res.json();
+      setData(body);
+    }
+    setLoadingData(false);
   };
 
   useEffect(() => {
-    fetchDataFromServer(1624666885920, 1624673885920, 10);
+    const it = setTimeout(() => {
+      fetchDataFromServer();
+    }, 4000);
+
+    return () => {
+      clearTimeout(it);
+    };
+  }, [data]);
+
+  useEffect(() => {
+    console.log('First update...');
+    fetchDataFromServer();
   }, []);
+
+  const handleRefresh = () => {
+    fetchDataFromServer();
+  };
 
   return (
     <div {...props} className={classes.root}>
-      <Typography
-        variant="h5"
-        color="primary"
-        style={{
-          fontWeight: 'bold',
-          // fontFamily: 'Teko',
-        }}
-      >
-        Device PieChart
-      </Typography>
+      <div className={classes.header}>
+        <Typography
+          variant="h5"
+          color="primary"
+          className={classes.headerTitle}
+        >
+          Device Activity
+        </Typography>
+
+        <IconButton
+          aria-label="search"
+          onClick={handleRefresh}
+          size="small"
+          className={classes.refreshButton}
+        >
+          <RefreshIcon color="primary" />
+        </IconButton>
+        {loadingData && (
+          <CircularProgress className={classes.refreshIndicator} size={24} />
+        )}
+      </div>
       <div className={classes.table}>
         <MyResponsivePie data={data} theme={chartTheme} />
       </div>
