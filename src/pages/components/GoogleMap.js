@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import WarningIcon from '@material-ui/icons/Warning';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 
 const useStyles = makeStyles(theme => ({
@@ -16,10 +17,6 @@ const useStyles = makeStyles(theme => ({
     background: theme.palette.error.main,
     color: theme.palette.text.dark,
     fontWeight: 'bold',
-  },
-  bubble: {
-    width: '100%',
-    height: '100%',
   },
 }));
 
@@ -48,20 +45,71 @@ const deviceColors = [
 ];
 
 const BubbleMarker = props => {
-  const { color, ...other } = props;
+  const theme = useTheme();
+  const { message, ...other } = props;
+  const { color } = props;
+  // if (message.alert) {
+  //   color = theme.palette.error.main;
+  // }
   const classes = useStyles();
 
+  const large = {
+    width: 32,
+    height: 32,
+  };
+
+  const main = {
+    width: 24,
+    height: 24,
+  };
+
   return (
-    <div className={classes.bubble} {...other}>
+    <div style={message.alert ? large : main} {...other}>
       <IconButton
-        size="small"
         style={{
           color,
-          background: fade(color, 0.1),
-          boxShadow: `0 0px 5px 1px ${color}`,
+          background: message.alert ? 'transparent' : fade(color, 0.1),
+          boxShadow: `0 0px 5px 1px ${message.alert ? 'transparent' : color}`,
+          width: '100%',
+          height: '100%',
+          padding: 0,
         }}
       >
-        <InfoIcon fontSize="small" style={{}} />
+        {message.alert ? (
+          <div
+            style={{
+              // position: 'relative',
+              widht: '100%',
+              height: '100%',
+            }}
+          >
+            <ErrorOutlineIcon
+              style={{
+                width: '100%',
+                height: '100%',
+                top: 0,
+                left: 0,
+                // fill: 'transparent',
+                // background: fade(color, 0.1),
+
+                // '-webkit-filter': `drop-shadow( 0px 0px 5px 1px ${color} )`,
+                // filter: `drop-shadow( 0px 0px 8px 3px ${color} )`,
+                filter: `drop-shadow( 0px 0px 3px ${color}  )`,
+                position: 'absolute',
+
+                /* Similar syntax to box-shadow */
+                zIndex: 10,
+              }}
+            />
+          </div>
+        ) : (
+          <InfoIcon
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        )}
       </IconButton>
     </div>
   );
@@ -98,7 +146,7 @@ export default function SimpleMap(props) {
       // showLabel: false,
       viewMode: '3D',
       mapStyle: 'amap://styles/dark',
-      pitch: 30,
+      pitch: 0,
     });
 
     console.log(map);
@@ -188,7 +236,10 @@ export default function SimpleMap(props) {
             position: new AMap.LngLat(message.lng, message.lat),
             // 将 html 传给 content
             content: renderToStaticMarkup(
-              <BubbleMarker color={fade(deviceColors[device.index], 0.7)} />,
+              <BubbleMarker
+                color={fade(deviceColors[device.index], 0.7)}
+                message={message}
+              />,
             ),
             anchor: 'center', // 设置锚点
             offset: new AMap.Pixel(0, 0), // 设置偏移量
