@@ -13,18 +13,12 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import moment from 'moment';
-
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-  KeyboardTimePicker,
-} from '@material-ui/pickers';
-
 import tempBump from '../../assets/temp/tempBump';
 import chartTheme from '../../theme/chartTheme';
 import Loading from './LoadingMask';
+
+import DatePickerButton from './DatePickerButton';
+import DateTimePicker from './DateTimePicker';
 
 const useStyles = makeStyles(theme => ({
   table: {
@@ -42,14 +36,6 @@ const useStyles = makeStyles(theme => ({
     borderRadius: '32px',
     minWidth: 320,
     width: '60%',
-  },
-
-  picker: {
-    paddingLeft: theme.spacing(1),
-  },
-
-  pickerButton: {
-    background: theme.palette.background.button,
   },
 
   header: {
@@ -126,84 +112,6 @@ const MyResponsiveAreaBump = ({ data /* see data tab */, theme }) => (
     axisBottom={null}
   />
 );
-
-const DateTimePicker = props => {
-  const { start, anchorEl, setAnchorEl, date, setDate, ...other } = props;
-  const classes = useStyles();
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  return (
-    <Popover
-      open={Boolean(anchorEl)}
-      anchorEl={anchorEl}
-      onClose={handlePopoverClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
-      {...other}
-    >
-      <div className={classes.picker}>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <KeyboardDatePicker
-            // disableToolbar
-            variant="inline"
-            format="yyyy/MM/dd"
-            margin="normal"
-            id="date-picker-inline"
-            label={start ? 'Starting Date' : 'End Date'}
-            value={date}
-            onChange={newDate => {
-              setDate(newDate);
-            }}
-            KeyboardButtonProps={{
-              'aria-label': 'change date',
-            }}
-          />
-          <KeyboardTimePicker
-            // disableToolbar
-            variant="inline"
-            margin="normal"
-            id="time-picker"
-            label={start ? 'Starting Time' : 'End Time'}
-            value={date}
-            onChange={newDate => {
-              setDate(newDate);
-            }}
-            KeyboardButtonProps={{
-              'aria-label': 'change time',
-            }}
-          />
-        </MuiPickersUtilsProvider>
-      </div>
-    </Popover>
-  );
-};
-
-const DatePickerButton = props => {
-  const { date, setAnchorEl, ...other } = props;
-
-  const classes = useStyles();
-  return (
-    <Button
-      // variant="outlined"
-      className={classes.pickerButton}
-      onClick={e => {
-        setAnchorEl(e.target);
-      }}
-      {...other}
-    >
-      {moment(date).format('yyyy-MM-DD hh:mm:ss')}
-    </Button>
-  );
-};
 
 export default function BumpChart(props) {
   const theme = useTheme();

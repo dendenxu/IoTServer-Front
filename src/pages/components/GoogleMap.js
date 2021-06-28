@@ -9,7 +9,14 @@ import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import WarningIcon from '@material-ui/icons/Warning';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+import DatePickerButton from './DatePickerButton';
+import DateTimePicker from './DateTimePicker';
 
 const useStyles = makeStyles(theme => ({
   popover: {
@@ -17,6 +24,35 @@ const useStyles = makeStyles(theme => ({
     background: theme.palette.error.main,
     color: theme.palette.text.dark,
     fontWeight: 'bold',
+  },
+
+  header: {
+    display: 'flex',
+    justifyContent: 'start',
+    alignItems: 'center',
+    width: '100%',
+    paddingLeft: theme.spacing(2),
+    marginTop: -theme.spacing(1),
+    height: '6%',
+  },
+
+  map: {
+    width: '100%',
+    height: '94%',
+    borderRadius: theme.spacing(4),
+  },
+
+  headerTitle: {
+    fontWeight: 'bold',
+    display: 'flex',
+  },
+
+  headerDetail: {
+    color: theme.palette.text.secondary,
+    marginLeft: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'end',
   },
 }));
 
@@ -33,7 +69,7 @@ const loadAMap = async () => {
   });
 };
 
-const deviceColors = [
+const rawDeviceColors = [
   '#EFBB51',
   '#7F3CFF',
   '#4CC19B',
@@ -44,13 +80,17 @@ const deviceColors = [
   '#7A0FA6',
 ];
 
+const deviceColors = i => rawDeviceColors[i % rawDeviceColors.length];
+
 const BubbleMarker = props => {
   const theme = useTheme();
   const { message, ...other } = props;
-  const { color } = props;
-  // if (message.alert) {
-  //   color = theme.palette.error.main;
-  // }
+  let { color } = props;
+  if (message.alert) {
+    // color = color;
+  } else {
+    color = fade(color, 0.6);
+  }
   const classes = useStyles();
 
   const large = {
@@ -98,12 +138,12 @@ const BubbleMarker = props => {
                 position: 'absolute',
 
                 /* Similar syntax to box-shadow */
-                zIndex: 10,
+                // zIndex: 10,
               }}
             />
           </div>
         ) : (
-          <InfoIcon
+          <HelpOutlineIcon
             style={{
               width: '100%',
               height: '100%',
@@ -125,6 +165,15 @@ export default function SimpleMap(props) {
   const [toMills, setToMills] = useState(1624844080000);
   const [detail, setDetail] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [loadingData, setLoadingData] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+
+  const [fromAnchorEl, setFromAnchorEl] = useState(null);
+  const [toAnchorEl, setToAnchorEl] = useState(null);
+
+  const [from, setFrom] = useState(new Date(1624666885920));
+  const [to, setTo] = useState(new Date(1624673885920));
 
   const classes = useStyles();
 
@@ -177,9 +226,9 @@ export default function SimpleMap(props) {
       // altitude: (index, feature) => feature.properties.type * 100,
       altitude: 0,
       lineWidth: 4,
-      color: (index, feature) => deviceColors[feature.properties.type],
+      color: (index, feature) => deviceColors(feature.properties.type),
       // 脉冲头颜色
-      headColor: (index, feature) => deviceColors[feature.properties.type],
+      headColor: (index, feature) => deviceColors(feature.properties.type),
       // 脉冲尾颜色
       trailColor: 'rgba(128, 128, 128, 0.5)',
       // 脉冲长度，0.25 表示一段脉冲占整条路的 1/4
@@ -190,7 +239,7 @@ export default function SimpleMap(props) {
     loca.add(layer);
     loca.animate.start();
 
-    // // 图例
+    // // // 图例
     // const lengend = new Loca.Legend({
     //   loca,
     //   title: {
@@ -205,14 +254,14 @@ export default function SimpleMap(props) {
     //     fontSize: '12px',
     //   },
     //   dataMap: [
-    //     { label: 'A类型', color: deviceColors[7] },
-    //     { label: 'B类型', color: deviceColors[6] },
-    //     { label: 'C类型', color: deviceColors[5] },
-    //     { label: 'D类型', color: deviceColors[4] },
-    //     { label: 'E类型', color: deviceColors[3] },
-    //     { label: 'F类型', color: deviceColors[2] },
-    //     { label: 'G类型', color: deviceColors[1] },
-    //     { label: 'H类型', color: deviceColors[0] },
+    //     { label: 'A类型', color: deviceColors(7) },
+    //     { label: 'B类型', color: deviceColors(6) },
+    //     { label: 'C类型', color: deviceColors(5) },
+    //     { label: 'D类型', color: deviceColors(4) },
+    //     { label: 'E类型', color: deviceColors(3) },
+    //     { label: 'F类型', color: deviceColors(2) },
+    //     { label: 'G类型', color: deviceColors(1) },
+    //     { label: 'H类型', color: deviceColors(0) },
     //   ],
     // });
   };
@@ -237,7 +286,7 @@ export default function SimpleMap(props) {
             // 将 html 传给 content
             content: renderToStaticMarkup(
               <BubbleMarker
-                color={fade(deviceColors[device.index], 0.7)}
+                color={deviceColors(device.index)}
                 message={message}
               />,
             ),
@@ -277,14 +326,61 @@ export default function SimpleMap(props) {
     setAnchorEl(null);
   };
 
+  const handleRefresh = () => {};
+
   return (
     <div
       style={{
-        padding: theme.spacing(2),
+        // padding: theme.spacing(2),
         width: '100%',
         height: '100%',
+        backgroundColor: theme.palette.background.widget,
+        borderRadius: theme.spacing(4),
+        padding: theme.spacing(2),
       }}
     >
+      <div className={classes.header}>
+        <Typography
+          variant="h5"
+          color="primary"
+          className={classes.headerTitle}
+        >
+          Device Activity
+        </Typography>
+
+        <Typography variant="body1" className={classes.headerDetail}>
+          Device activity rank from{` `}
+          <DatePickerButton
+            date={from}
+            setAnchorEl={setFromAnchorEl}
+            className={classes.headerDetailElement}
+          />
+          {` `}to{` `}
+          <DatePickerButton
+            date={to}
+            setAnchorEl={setToAnchorEl}
+            className={classes.headerDetailElement}
+          />
+          <IconButton
+            aria-label="search"
+            onClick={handleRefresh}
+            size="small"
+            className={classes.refreshButton}
+          >
+            <RefreshIcon
+              style={{
+                color: needRefresh
+                  ? theme.palette.warning.main
+                  : theme.palette.primary.main,
+              }}
+            />
+          </IconButton>
+          {loadingData && (
+            <CircularProgress className={classes.refreshIndicator} size={24} />
+          )}
+        </Typography>
+      </div>
+
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
@@ -302,14 +398,21 @@ export default function SimpleMap(props) {
         <Typography className={classes.popover}>Hello, world.</Typography>
       </Popover>
 
-      <div
-        id="map"
-        style={{
-          width: '100%',
-          height: '100%',
-          borderRadius: theme.spacing(4),
-        }}
+      <DateTimePicker
+        start
+        anchorEl={fromAnchorEl}
+        setAnchorEl={setFromAnchorEl}
+        date={from}
+        setDate={setFrom}
       />
+      <DateTimePicker
+        anchorEl={toAnchorEl}
+        setAnchorEl={setToAnchorEl}
+        date={to}
+        setDate={setTo}
+      />
+
+      <div id="map" className={classes.map} />
     </div>
   );
 }
