@@ -6,6 +6,7 @@ import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import InfoIcon from '@material-ui/icons/Info';
 import WarningIcon from '@material-ui/icons/Warning';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
@@ -14,7 +15,9 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Color from 'color';
 
+import { ReactComponent as RobotIcon } from '../../assets/images/robot.svg';
 import DatePickerButton from './DatePickerButton';
 import DateTimePicker from './DateTimePicker';
 
@@ -30,15 +33,22 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'start',
     alignItems: 'center',
-    width: '100%',
-    paddingLeft: theme.spacing(2),
-    marginTop: -theme.spacing(1),
-    height: '6%',
+    flexDirection: 'row',
+    // width: '100%',
+    padding: theme.spacing(1, 2),
+    position: 'absolute',
+    top: theme.spacing(3),
+    left: theme.spacing(3),
+    zIndex: 2000,
+    borderRadius: theme.spacing(4),
+    // background: Color(theme.palette.background.widget).alpha(0.75),
+    background: fade(theme.palette.background.widget, 0.75),
+    // height: '6%',
   },
 
   map: {
     width: '100%',
-    height: '94%',
+    height: '100%',
     borderRadius: theme.spacing(4),
   },
 
@@ -53,6 +63,47 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'end',
+  },
+
+  headerDetailElement: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+
+  root: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+
+  tooltip: {
+    position: 'absolute',
+    bottom: theme.spacing(3),
+    left: theme.spacing(3),
+    zIndex: 2000,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    borderRadius: theme.spacing(4),
+    // background: Color(theme.palette.background.widget).alpha(0.75),
+    background: fade(theme.palette.background.widget, 0.75),
+    padding: theme.spacing(2, 2),
+  },
+
+  flex: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'start',
+    alignItems: 'center',
+  },
+
+  refreshButton: {
+    marginRight: theme.spacing(1),
+  },
+
+  refreshIndicator: {
+    height: '70%',
+    marginLeft: theme.spacing(1),
   },
 }));
 
@@ -83,74 +134,63 @@ const rawDeviceColors = [
 const deviceColors = i => rawDeviceColors[i % rawDeviceColors.length];
 
 const BubbleMarker = props => {
-  const theme = useTheme();
   const { message, ...other } = props;
   let { color } = props;
   if (message.alert) {
     // color = color;
   } else {
-    color = fade(color, 0.6);
+    color = fade(color, 0.8);
   }
-  const classes = useStyles();
 
   const large = {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   };
 
   const main = {
     width: 24,
     height: 24,
+    borderRadius: 12,
   };
 
   return (
-    <div style={message.alert ? large : main} {...other}>
-      <IconButton
-        style={{
-          color,
-          background: message.alert ? 'transparent' : fade(color, 0.1),
-          boxShadow: `0 0px 5px 1px ${message.alert ? 'transparent' : color}`,
-          width: '100%',
-          height: '100%',
-          padding: 0,
-        }}
-      >
-        {message.alert ? (
-          <div
-            style={{
-              // position: 'relative',
-              widht: '100%',
-              height: '100%',
-            }}
-          >
-            <ErrorOutlineIcon
-              style={{
-                width: '100%',
-                height: '100%',
-                top: 0,
-                left: 0,
-                // fill: 'transparent',
-                // background: fade(color, 0.1),
-
-                // '-webkit-filter': `drop-shadow( 0px 0px 5px 1px ${color} )`,
-                // filter: `drop-shadow( 0px 0px 8px 3px ${color} )`,
-                filter: `drop-shadow( 0px 0px 3px ${color}  )`,
-                position: 'absolute',
-
-                /* Similar syntax to box-shadow */
-                // zIndex: 10,
-              }}
-            />
-          </div>
-        ) : (
-          <HelpOutlineIcon
+    <div
+      style={{
+        ...(message.alert ? large : main),
+        color,
+        background: message.alert ? 'transparent' : fade(color, 0.1),
+        boxShadow: `0 0px 5px 1px ${message.alert ? 'transparent' : color}`,
+        padding: 0,
+      }}
+      {...other}
+    >
+      {message.alert ? (
+        <div
+          style={{
+            widht: '100%',
+            height: '100%',
+          }}
+        >
+          <ErrorOutlineIcon
             style={{
               width: '100%',
               height: '100%',
+              top: 0,
+              left: 0,
+              filter: `drop-shadow( 0px 0px 3px ${color}  )`,
+              position: 'absolute',
             }}
           />
-        )}
-      </IconButton>
+        </div>
+      ) : (
+        <HelpOutlineIcon
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -159,11 +199,11 @@ let loca = null;
 let map = null;
 let AMap = null;
 let Loca = null;
+let layer = null;
 
 export default function SimpleMap(props) {
   const [fromMills, setFromMills] = useState(1624843660000);
   const [toMills, setToMills] = useState(1624844080000);
-  const [detail, setDetail] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [loadingData, setLoadingData] = useState(false);
@@ -174,6 +214,9 @@ export default function SimpleMap(props) {
 
   const [from, setFrom] = useState(new Date(1624666885920));
   const [to, setTo] = useState(new Date(1624673885920));
+
+  const [deviceStore, setDeviceStore] = useState(null);
+  const [geoStore, setGeoStore] = useState(null);
 
   const classes = useStyles();
 
@@ -208,15 +251,11 @@ export default function SimpleMap(props) {
     fetchDetailFromServer();
   }, []);
 
-  // if (loading) {
-  //   return <div id="map" />;
-  // }
-
   const updateGeo = geo => {
-    const layer = new Loca.PulseLineLayer({
+    layer = new Loca.PulseLineLayer({
       loca,
       zIndex: 100,
-      opacity: 0.4,
+      opacity: 0.7,
       visible: true,
       zooms: [2, 22],
     });
@@ -238,32 +277,6 @@ export default function SimpleMap(props) {
     });
     loca.add(layer);
     loca.animate.start();
-
-    // // // 图例
-    // const lengend = new Loca.Legend({
-    //   loca,
-    //   title: {
-    //     label: '公交类型',
-    //     fontColor: 'rgba(255,255,255,0.4)',
-    //     fontSize: '16px',
-    //   },
-    //   style: {
-    //     backgroundColor: 'rgba(255,255,255,0.1)',
-    //     left: '20px',
-    //     bottom: '40px',
-    //     fontSize: '12px',
-    //   },
-    //   dataMap: [
-    //     { label: 'A类型', color: deviceColors(7) },
-    //     { label: 'B类型', color: deviceColors(6) },
-    //     { label: 'C类型', color: deviceColors(5) },
-    //     { label: 'D类型', color: deviceColors(4) },
-    //     { label: 'E类型', color: deviceColors(3) },
-    //     { label: 'F类型', color: deviceColors(2) },
-    //     { label: 'G类型', color: deviceColors(1) },
-    //     { label: 'H类型', color: deviceColors(0) },
-    //   ],
-    // });
   };
 
   const fetchGeoFromServer = async () => {
@@ -273,6 +286,7 @@ export default function SimpleMap(props) {
     });
 
     updateGeo(geo);
+    setGeoStore(geo);
   };
 
   const updateMarkers = devices => {
@@ -284,7 +298,7 @@ export default function SimpleMap(props) {
           const marker = new AMap.Marker({
             position: new AMap.LngLat(message.lng, message.lat),
             // 将 html 传给 content
-            content: renderToStaticMarkup(
+            content: renderToString(
               <BubbleMarker
                 color={deviceColors(device.index)}
                 message={message}
@@ -318,6 +332,8 @@ export default function SimpleMap(props) {
 
     if (res.ok) {
       const devices = await res.json();
+      // deviceStore = devices;
+      setDeviceStore(devices);
       updateMarkers(devices);
     }
   };
@@ -326,19 +342,24 @@ export default function SimpleMap(props) {
     setAnchorEl(null);
   };
 
-  const handleRefresh = () => {};
+  const handleRefresh = async () => {
+    setLoadingData(true);
+    map.clearMap();
+    if (layer) {
+      loca.remove(layer);
+    }
+    // loca.remove(null);
+    loca.viewControl.clearAnimates();
+    console.log(loca);
+
+    const fetchGeo = fetchGeoFromServer();
+    const fetchDetail = fetchDetailFromServer();
+    await Promise.all([fetchGeo, fetchDetail]);
+    setLoadingData(false);
+  };
 
   return (
-    <div
-      style={{
-        // padding: theme.spacing(2),
-        width: '100%',
-        height: '100%',
-        backgroundColor: theme.palette.background.widget,
-        borderRadius: theme.spacing(4),
-        padding: theme.spacing(2),
-      }}
-    >
+    <div className={classes.root}>
       <div className={classes.header}>
         <Typography
           variant="h5"
@@ -413,6 +434,100 @@ export default function SimpleMap(props) {
       />
 
       <div id="map" className={classes.map} />
+      <div className={classes.tooltip}>
+        <div className={classes.flex}>
+          <HelpOutlineIcon
+            fontSize="small"
+            style={{
+              color: theme.palette.primary.main,
+              filter: `drop-shadow( 0px 0px 3px ${theme.palette.primary.main} )`,
+            }}
+          />
+          <Typography
+            variant="body1"
+            style={{
+              marginLeft: theme.spacing(1),
+              color: theme.palette.primary.main,
+              fontWeight: 'bold',
+            }}
+          >
+            {' '}
+            Regular Messages{' '}
+          </Typography>
+        </div>
+        <div className={classes.flex}>
+          <ErrorOutlineIcon
+            fontSize="small"
+            style={{
+              color: theme.palette.error.main,
+              filter: `drop-shadow( 0px 0px 3px ${theme.palette.error.main} )`,
+            }}
+          />
+          <Typography
+            variant="body1"
+            style={{
+              marginLeft: theme.spacing(1),
+              color: theme.palette.error.main,
+              fontWeight: 'bold',
+            }}
+          >
+            {' '}
+            Alert messages{' '}
+          </Typography>
+        </div>
+        <div
+          style={{
+            height: theme.spacing(1),
+          }}
+        />
+
+        {deviceStore &&
+          deviceStore.map(device => (
+            // <Button
+            //   onClick={e => {}}
+            //   style={{
+            //     background: fade(theme.palette.background.button, 0.85),
+            //   }}
+            // >
+            <div className={classes.flex} key={device.mqttId}>
+              {/* <RobotIcon
+                style={{
+                  width: 16,
+                  height: 16,
+                  color: deviceColors(device.index),
+                }}
+              /> */}
+              <HelpOutlineIcon
+                fontSize="small"
+                style={{
+                  color: deviceColors(device.index),
+                  filter: `drop-shadow( 0px 0px 3px ${deviceColors(
+                    device.index,
+                  )} )`,
+                }}
+              />
+              <Typography
+                variant="body1"
+                style={{
+                  marginLeft: theme.spacing(1),
+                  color: deviceColors(device.index),
+                  fontWeight: 'bold',
+                }}
+              >
+                {device.mqttId}
+              </Typography>
+            </div>
+            // </Button>
+          ))}
+
+        {/* <Typography variant="body1"> Help </Typography>
+        <Typography variant="body1"> Help </Typography>
+        <Typography variant="body1"> Help </Typography>
+        <Typography variant="body1"> Help </Typography> */}
+        {/* <Button size="small"> Hello </Button>
+        <Button size="small"> Hello </Button>
+        <Button size="small"> Hello </Button> */}
+      </div>
     </div>
   );
 }
