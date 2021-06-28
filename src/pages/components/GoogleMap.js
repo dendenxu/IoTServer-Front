@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import WarningIcon from '@material-ui/icons/Warning';
-import { renderToString } from 'react-dom/server';
+import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 
 const useStyles = makeStyles(theme => ({
   popover: {
@@ -18,8 +18,6 @@ const useStyles = makeStyles(theme => ({
     fontWeight: 'bold',
   },
   bubble: {
-    // width: theme.spacing(4),
-    // height: theme.spacing(4),
     width: '100%',
     height: '100%',
   },
@@ -59,9 +57,11 @@ const BubbleMarker = props => {
         size="small"
         style={{
           color,
+          background: fade(color, 0.1),
+          boxShadow: `0 0px 5px 1px ${color}`,
         }}
       >
-        <InfoIcon fontSize="small" />
+        <InfoIcon fontSize="small" style={{}} />
       </IconButton>
     </div>
   );
@@ -187,7 +187,7 @@ export default function SimpleMap(props) {
           const marker = new AMap.Marker({
             position: new AMap.LngLat(message.lng, message.lat),
             // 将 html 传给 content
-            content: renderToString(
+            content: renderToStaticMarkup(
               <BubbleMarker color={fade(deviceColors[device.index], 0.7)} />,
             ),
             anchor: 'center', // 设置锚点
@@ -196,6 +196,8 @@ export default function SimpleMap(props) {
             // offset: new AMap.Pixel(-13, -30)
             clickable: true,
             bubble: true,
+            // zIndex: 1301,
+            altitude: 100 * device.index,
           });
 
           map.add(marker);
@@ -236,7 +238,7 @@ export default function SimpleMap(props) {
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={handlePopoverClose}
-        onClick={handlePopoverClose}
+        // onClick={handlePopoverClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',

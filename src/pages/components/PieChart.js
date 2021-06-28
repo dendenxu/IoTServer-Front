@@ -85,6 +85,7 @@ const MyResponsivePie = ({ data /* see data tab */, theme }) => (
 );
 
 export default function PieChart(props) {
+  const theme = useTheme();
   const classes = useStyles();
   const [data, setData] = useState(tempPie);
   const [loadingData, setLoadingData] = useState(false);
@@ -136,8 +137,11 @@ export default function PieChart(props) {
           onClick={handleRefresh}
           size="small"
           className={classes.refreshButton}
+          style={{
+            color: theme.palette.primary.main,
+          }}
         >
-          <RefreshIcon color="primary" />
+          <RefreshIcon />
         </IconButton>
         {loadingData && (
           <CircularProgress className={classes.refreshIndicator} size={24} />
