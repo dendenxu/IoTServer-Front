@@ -15,6 +15,8 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import FlightTakeoffIcon from '@material-ui/icons/FlightTakeoff';
+import FlightLandIcon from '@material-ui/icons/FlightLand';
 import Color from 'color';
 
 import { ReactComponent as RobotIcon } from '../../assets/images/robot.svg';
@@ -121,14 +123,26 @@ const loadAMap = async () => {
 };
 
 const rawDeviceColors = [
-  '#EFBB51',
-  '#7F3CFF',
-  '#4CC19B',
-  '#0B5D74',
-  '#E06AC4',
-  '#223F9B',
-  '#F15C1A',
-  '#7A0FA6',
+  // '#EFBB51',
+  // '#A06BFF',
+  // '#79C2AD',
+  // '#F895F0',
+  // '#96E1FF',
+  // '#E06AC4',
+  // '#89A4E0',
+  // '#F15C1A',
+  '#E93B81',
+  '#F5ABC9',
+  '#FFE5E2',
+  '#B6C9F0',
+  '#E99497',
+  '#F3C583',
+  '#E8E46E',
+  '#B3E283',
+  '#867AE9',
+  '#FFF5AB',
+  '#FFCEAD',
+  '#C449C2',
 ];
 
 const deviceColors = i => rawDeviceColors[i % rawDeviceColors.length];
@@ -218,11 +232,19 @@ export default function SimpleMap(props) {
   const [deviceStore, setDeviceStore] = useState(null);
   const [geoStore, setGeoStore] = useState(null);
 
+  const [showPath, setShowPath] = useState(true);
+
   const classes = useStyles();
 
   const theme = useTheme();
 
+  useEffect(() => {
+    // we'd like the user to click refresh manually since it might introduce too much load if not
+    setNeedRefresh(true);
+  }, [from, to]);
+
   useEffect(async () => {
+    setLoadingData(true);
     if (!window.Loca && !window.AMap) {
       await loadAMap();
     }
@@ -247,8 +269,11 @@ export default function SimpleMap(props) {
       map,
     });
 
-    fetchGeoFromServer();
-    fetchDetailFromServer();
+    const fetchGeo = fetchGeoFromServer();
+    const fetchDetail = fetchDetailFromServer();
+    await Promise.all([fetchGeo, fetchDetail]);
+    setLoadingData(false);
+    setNeedRefresh(false);
   }, []);
 
   const updateGeo = geo => {
@@ -356,6 +381,22 @@ export default function SimpleMap(props) {
     const fetchDetail = fetchDetailFromServer();
     await Promise.all([fetchGeo, fetchDetail]);
     setLoadingData(false);
+    setNeedRefresh(false);
+  };
+
+  const handleChangeShowPath = async () => {
+    const curShowPath = !showPath;
+    setShowPath(curShowPath);
+    if (curShowPath) {
+      loca.add(layer);
+      loca.animate.start();
+    } else {
+      if (layer) {
+        loca.remove(layer);
+      }
+      // loca.remove(null);
+      loca.viewControl.clearAnimates();
+    }
   };
 
   return (
@@ -396,6 +437,33 @@ export default function SimpleMap(props) {
               }}
             />
           </IconButton>
+          <IconButton
+            aria-label="search"
+            onClick={handleChangeShowPath}
+            size="small"
+            className={classes.refreshButton}
+          >
+            {/* <RefreshIcon
+              style={{
+                color: showPath
+                  ? theme.palette.primary.main
+                  : theme.palette.warning.main,
+              }}
+            /> */}
+            {showPath ? (
+              <FlightLandIcon
+                style={{
+                  color: theme.palette.error.main,
+                }}
+              />
+            ) : (
+              <FlightTakeoffIcon
+                style={{
+                  color: theme.palette.warning.main,
+                }}
+              />
+            )}
+          </IconButton>
           {loadingData && (
             <CircularProgress className={classes.refreshIndicator} size={24} />
           )}
@@ -406,7 +474,6 @@ export default function SimpleMap(props) {
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={handlePopoverClose}
-        // onClick={handlePopoverClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',
@@ -472,7 +539,7 @@ export default function SimpleMap(props) {
             }}
           >
             {' '}
-            Alert messages{' '}
+            Alert Messages{' '}
           </Typography>
         </div>
         <div
@@ -483,20 +550,7 @@ export default function SimpleMap(props) {
 
         {deviceStore &&
           deviceStore.map(device => (
-            // <Button
-            //   onClick={e => {}}
-            //   style={{
-            //     background: fade(theme.palette.background.button, 0.85),
-            //   }}
-            // >
             <div className={classes.flex} key={device.mqttId}>
-              {/* <RobotIcon
-                style={{
-                  width: 16,
-                  height: 16,
-                  color: deviceColors(device.index),
-                }}
-              /> */}
               <HelpOutlineIcon
                 fontSize="small"
                 style={{
@@ -517,16 +571,7 @@ export default function SimpleMap(props) {
                 {device.mqttId}
               </Typography>
             </div>
-            // </Button>
           ))}
-
-        {/* <Typography variant="body1"> Help </Typography>
-        <Typography variant="body1"> Help </Typography>
-        <Typography variant="body1"> Help </Typography>
-        <Typography variant="body1"> Help </Typography> */}
-        {/* <Button size="small"> Hello </Button>
-        <Button size="small"> Hello </Button>
-        <Button size="small"> Hello </Button> */}
       </div>
     </div>
   );
