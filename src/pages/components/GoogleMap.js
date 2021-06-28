@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import WarningIcon from '@material-ui/icons/Warning';
+import { renderToString } from 'react-dom/server';
 
 const useStyles = makeStyles(theme => ({
   popover: {
@@ -15,6 +16,12 @@ const useStyles = makeStyles(theme => ({
     background: theme.palette.error.main,
     color: theme.palette.text.dark,
     fontWeight: 'bold',
+  },
+  bubble: {
+    // width: theme.spacing(4),
+    // height: theme.spacing(4),
+    width: '100%',
+    height: '100%',
   },
 }));
 
@@ -43,32 +50,17 @@ const deviceColors = [
 ];
 
 const BubbleMarker = props => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const { color, ...other } = props;
   const classes = useStyles();
-  const handlePopoverClose = el => {
-    setAnchorEl(null);
-  };
 
   return (
-    <div>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handlePopoverClose}
-        onClick={handlePopoverClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
+    <div className={classes.bubble} {...other}>
+      <IconButton
+        size="small"
+        style={{
+          color,
         }}
       >
-        <Typography>Hello, world</Typography>
-      </Popover>
-
-      <IconButton size="small">
         <InfoIcon fontSize="small" />
       </IconButton>
     </div>
@@ -77,25 +69,30 @@ const BubbleMarker = props => {
 
 let loca = null;
 let map = null;
+let AMap = null;
+let Loca = null;
 
 export default function SimpleMap(props) {
   const [fromMills, setFromMills] = useState(1624843660000);
   const [toMills, setToMills] = useState(1624844080000);
-  const [detailed, setDetailed] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [detail, setDetail] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const classes = useStyles();
 
   const theme = useTheme();
 
   useEffect(async () => {
-    const { Loca, AMap } = window;
-    console.log(Loca);
-    console.log(AMap);
-    if (!Loca && !AMap) {
+    if (!window.Loca && !window.AMap) {
       await loadAMap();
     }
+
+    AMap = window.AMap;
+    Loca = window.Loca;
+
     // Extract the global variable
     // ? what t f? does the variable name need to be exactly map???
-    map = new window.AMap.Map('map', {
+    map = new AMap.Map('map', {
       zoom: 11.2,
       center: [119.9, 30.1],
       // showLabel: false,
@@ -106,7 +103,7 @@ export default function SimpleMap(props) {
 
     console.log(map);
 
-    loca = new window.Loca.Container({
+    loca = new Loca.Container({
       map,
     });
 
@@ -119,7 +116,7 @@ export default function SimpleMap(props) {
   // }
 
   const updateGeo = geo => {
-    const layer = new window.Loca.PulseLineLayer({
+    const layer = new Loca.PulseLineLayer({
       loca,
       zIndex: 100,
       opacity: 0.4,
@@ -146,7 +143,7 @@ export default function SimpleMap(props) {
     loca.animate.start();
 
     // // 图例
-    // const lengend = new window.Loca.Legend({
+    // const lengend = new Loca.Legend({
     //   loca,
     //   title: {
     //     label: '公交类型',
@@ -174,7 +171,7 @@ export default function SimpleMap(props) {
 
   const fetchGeoFromServer = async () => {
     // Only load Loca and AMap on tab switch
-    const geo = new window.Loca.GeoJSONSource({
+    const geo = new Loca.GeoJSONSource({
       url: `/api/message/route?fromMills=${fromMills}&toMills=${toMills}`,
     });
 
@@ -187,6 +184,26 @@ export default function SimpleMap(props) {
       devices.forEach(device => {
         device.messages.forEach(message => {
           // const marker = AMap;
+          const marker = new AMap.Marker({
+            position: new AMap.LngLat(message.lng, message.lat),
+            // 将 html 传给 content
+            content: renderToString(
+              <BubbleMarker color={fade(deviceColors[device.index], 0.7)} />,
+            ),
+            anchor: 'center', // 设置锚点
+            offset: new AMap.Pixel(0, 0), // 设置偏移量
+            // 以 icon 的 [center bottom] 为原点
+            // offset: new AMap.Pixel(-13, -30)
+            clickable: true,
+            bubble: true,
+          });
+
+          map.add(marker);
+          marker.on('click', e => {
+            console.log(`Clicked marker`);
+            console.log(e);
+            setAnchorEl(e.originEvent.target);
+          });
         });
       });
     }
@@ -203,6 +220,10 @@ export default function SimpleMap(props) {
     }
   };
 
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <div
       style={{
@@ -211,6 +232,23 @@ export default function SimpleMap(props) {
         height: '100%',
       }}
     >
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handlePopoverClose}
+        onClick={handlePopoverClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Typography className={classes.popover}>Hello, world.</Typography>
+      </Popover>
+
       <div
         id="map"
         style={{
