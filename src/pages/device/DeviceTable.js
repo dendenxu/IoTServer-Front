@@ -771,13 +771,8 @@ export default function DeviceDataGrid(props) {
     let results = [];
     selection.forEach(i => {
       const row = data[i];
-      results.push(
-        handle(row)
-          .then(() => {})
-          .catch(() => {
-            console.log('Errors');
-          }),
-      );
+      // ! adding a then catch just won't!
+      results.push(handle(row));
     });
     results = (await Promise.all(results)).map(item => item | 0);
     if (!results.every(item => item)) {
