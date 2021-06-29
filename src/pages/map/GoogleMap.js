@@ -25,6 +25,8 @@ import DateTimePicker from '../components/DateTimePicker';
 
 import MessageBox from './MessageBox';
 
+import deviceColors from '../components/DeviceColors';
+
 const useStyles = makeStyles(theme => ({
   popover: {
     padding: theme.spacing(1),
@@ -124,31 +126,6 @@ const loadAMap = async () => {
   });
 };
 
-const rawDeviceColors = [
-  // '#EFBB51',
-  // '#A06BFF',
-  // '#79C2AD',
-  // '#F895F0',
-  // '#96E1FF',
-  // '#E06AC4',
-  // '#89A4E0',
-  // '#F15C1A',
-  '#E93B81',
-  '#F5ABC9',
-  '#FFE5E2',
-  '#B6C9F0',
-  '#E99497',
-  '#F3C583',
-  '#E8E46E',
-  '#B3E283',
-  '#867AE9',
-  '#FFF5AB',
-  '#FFCEAD',
-  '#C449C2',
-];
-
-const deviceColors = i => rawDeviceColors[i % rawDeviceColors.length];
-
 const BubbleMarker = props => {
   const { message, ...other } = props;
   let { color } = props;
@@ -211,6 +188,28 @@ const BubbleMarker = props => {
   );
 };
 
+const LeftUpPopover = props => {
+  const { anchorEl, handleClose, isOpen, ...other } = props;
+  return (
+    <Popover
+      open={isOpen}
+      anchorEl={anchorEl}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'left',
+      }}
+      {...other}
+    >
+      {props.children}
+    </Popover>
+  );
+};
+
 let loca = null;
 let map = null;
 let AMap = null;
@@ -236,6 +235,7 @@ export default function SimpleMap(props) {
   const [showPath, setShowPath] = useState(true);
 
   const [displayMessage, setDisplayMessage] = useState('');
+  const [displayDevice, setDisplayDevice] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const classes = useStyles();
@@ -250,9 +250,13 @@ export default function SimpleMap(props) {
   useEffect(() => {
     const setJob = async () => {
       setLoadingData(true);
-      // if (!window.Loca && !window.AMap) {
-      await loadAMap();
-      // }
+
+      try {
+        await loadAMap();
+      } catch (e) {
+        setErrorMessage(e);
+        setErrorAnchorEl(document.getElementById('root'));
+      }
 
       AMap = window.AMap;
       Loca = window.Loca;
@@ -290,7 +294,7 @@ export default function SimpleMap(props) {
       // 这已经是一个很严重的bug了，但是官方问答貌似没有很明确的说明。
       // 原因是：loca实例只能创建一个，虽然这里创建loca实例时只是使用了局部变量，但是高德地图生成了全局的loca实例。当我们切换页面再切回来时，又去创建一个实例，这时就有两个了，然后就是看到的效果，图出不来。
       // 最终的解决方案是，当前页面离开时，销毁loca实例。销毁不是直接置为Null就可以，而是要调loca的destroy方法。
-      console.error('Destorying the loca variable');
+      console.log('Destorying the loca variable');
       loca.remove(layer);
       loca.destroy();
     };
@@ -364,6 +368,7 @@ export default function SimpleMap(props) {
             console.log(`Clicked marker`);
             console.log(e);
             setDisplayMessage(message);
+            setDisplayDevice(device);
             setAnchorEl(e.originEvent.target);
           });
         });
@@ -502,38 +507,21 @@ export default function SimpleMap(props) {
         </Typography>
       </div>
 
-      <Popover
-        open={Boolean(anchorEl && displayMessage)}
+      <LeftUpPopover
+        isOpen={Boolean(anchorEl && displayMessage)}
         anchorEl={anchorEl}
-        onClose={handlePopoverClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+        handleClose={handlePopoverClose}
       >
-        <MessageBox message={displayMessage} />
-        {/* <Typography className={classes.popover}>Hello, world.</Typography> */}
-      </Popover>
+        <MessageBox message={displayMessage} device={displayDevice} />
+      </LeftUpPopover>
 
-      <Popover
-        open={Boolean(errorAnchorEl && errorMessage)}
-        anchorEl={anchorEl}
-        onClose={handleErrorPopoverClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+      <LeftUpPopover
+        isOpen={Boolean(errorAnchorEl && errorMessage)}
+        anchorEl={errorAnchorEl}
+        handleClose={handleErrorPopoverClose}
       >
         <Typography className={classes.popover}>{errorMessage}</Typography>
-      </Popover>
+      </LeftUpPopover>
 
       <DateTimePicker
         start

@@ -10,6 +10,7 @@ import {
 
 import { ErrorOutline } from '@material-ui/icons';
 import moment from 'moment';
+import deviceColors from '../components/DeviceColors';
 
 const useStyles = makeStyles(theme => ({
   line: {
@@ -27,7 +28,7 @@ const useStyles = makeStyles(theme => ({
 export default function MessageBox(props) {
   const theme = useTheme();
   const classes = useStyles();
-  const { message } = props;
+  const { message, device } = props;
   const { mqttId, info, value, alert, lat, lng, date } = message;
 
   return (
@@ -44,6 +45,7 @@ export default function MessageBox(props) {
         variant="h4"
         style={{
           fontFamily: 'Teko',
+          color: alert ? 'currentColor' : deviceColors(device.index),
         }}
       >
         {mqttId}
