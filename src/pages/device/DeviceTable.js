@@ -224,6 +224,10 @@ export default function DeviceDataGrid(props) {
         processPayload(body[i], i);
       }
       setData(body);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setAnchorEl(document.getElementById('root'));
     }
   };
 
@@ -243,11 +247,6 @@ export default function DeviceDataGrid(props) {
         payload,
         ...data.slice(id + 1, data.length),
       ]);
-      // columns.forEach(column => {
-      //   console.log('Updating column: ');
-      //   console.log(column.field);
-      //   data[id][column.field] = payload[column.field];
-      // });
     }
   };
 

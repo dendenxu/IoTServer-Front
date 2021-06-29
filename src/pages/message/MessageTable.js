@@ -198,6 +198,44 @@ export default function MessageDataGrid(props) {
   const [curPage, setCurPage] = useState(0);
   const [curPageSize, setCurPageSize] = useState(100);
 
+  const [loadingData, setLoadingData] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+
+  const [fromAnchorEl, setFromAnchorEl] = useState(null);
+  const [toAnchorEl, setToAnchorEl] = useState(null);
+
+  const [from, setFrom] = useState(new Date(1624774564339));
+  const [to, setTo] = useState(new Date(1624947224752));
+
+  useEffect(() => {
+    // we'd like the user to click refresh manually since it might introduce too much load if not
+    setNeedRefresh(true);
+  }, [from, to]);
+
+  const handleRefresh = async e => {
+    setLoadingData(true);
+    await fetchDataFromServer(curPage, curPageSize);
+    setLoadingData(false);
+    setNeedRefresh(false);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const CustomToolbar = () => (
+    <GridToolbarContainer>
+      <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+      <GridToolbarDensitySelector />
+      <GridToolbarExport />
+      <Button color="primary" size="small" onClick={handleRefresh}>
+        <RefreshIcon />
+        Refresh
+      </Button>
+    </GridToolbarContainer>
+  );
+
   const defaultPageSize = 100;
 
   useEffect(() => {
@@ -210,9 +248,12 @@ export default function MessageDataGrid(props) {
   }, [data]);
 
   useEffect(() => {
-    setLoadingData(true);
-    fetchDataFromServer();
-    setLoadingData(false);
+    (async () => {
+      setLoadingData(true);
+      console.log('Setting loading data...');
+      await fetchDataFromServer();
+      setLoadingData(false);
+    })();
   }, []);
 
   const processPayload = payload => {
@@ -220,12 +261,9 @@ export default function MessageDataGrid(props) {
   };
 
   // Quitely and passively fetch data from the server
-  const fetchDataFromServer = async (pageIndex, pageSize) => {
+  const fetchDataFromServer = async () => {
     // Fetch full data from the server, including latest status
     const res = await fetch(
-      // `/api/message/query?page=${pageIndex || 0}&size=${
-      // pageSize || defaultPageSize
-      // }`,
       `/api/message/query?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     );
     if (res.ok) {
@@ -234,6 +272,10 @@ export default function MessageDataGrid(props) {
       console.log(body);
       body.forEach(processPayload);
       setData(body);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setAnchorEl(document.getElementById('root'));
     }
   };
   // render some bold font to display important stuff
@@ -332,54 +374,6 @@ export default function MessageDataGrid(props) {
     },
   ];
 
-  const [loadingData, setLoadingData] = useState(false);
-  const [needRefresh, setNeedRefresh] = useState(false);
-
-  const [fromAnchorEl, setFromAnchorEl] = useState(null);
-  const [toAnchorEl, setToAnchorEl] = useState(null);
-
-  const [from, setFrom] = useState(new Date(1624774564339));
-  const [to, setTo] = useState(new Date(1624947224752));
-
-  useEffect(() => {
-    // we'd like the user to click refresh manually since it might introduce too much load if not
-    setNeedRefresh(true);
-  }, [from, to]);
-
-  const handleRefresh = async e => {
-    setLoadingData(true);
-    await fetchDataFromServer(curPage, curPageSize);
-    setLoadingData(false);
-    setNeedRefresh(false);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const CustomToolbar = () => (
-    <GridToolbarContainer>
-      <GridToolbarColumnsButton />
-      <GridToolbarFilterButton />
-      <GridToolbarDensitySelector />
-      <GridToolbarExport />
-      <Button color="primary" size="small" onClick={handleRefresh}>
-        <RefreshIcon />
-        Refresh
-      </Button>
-    </GridToolbarContainer>
-  );
-
-  const handlePageChange = async params => {
-    console.log(params);
-    const { page, pageSize } = params;
-    setLoadingData(true);
-    setCurPage(page);
-    setCurPageSize(pageSize);
-    await fetchDataFromServer(page, pageSize);
-    setLoadingData(false);
-  };
-
   return (
     <div className={classes.table}>
       <div className={classes.header}>
@@ -463,15 +457,11 @@ export default function MessageDataGrid(props) {
         className={classes.datagrid}
         rows={data}
         columns={columns}
-        // checkboxSelection
         disableSelectionOnClick
         autoHeight
         pagination
         density="compact"
         pageSize={defaultPageSize}
-        // rowCount={16384}
-        // paginationMode="server"
-        // onPageChange={handlePageChange}
         components={{
           Toolbar: CustomToolbar,
         }}

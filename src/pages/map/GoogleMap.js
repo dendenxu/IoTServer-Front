@@ -219,6 +219,7 @@ let layer = null;
 
 export default function SimpleMap(props) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [errorAnchorEl, setErrorAnchorEl] = useState(null);
 
   const [loadingData, setLoadingData] = useState(false);
   const [needRefresh, setNeedRefresh] = useState(false);
@@ -235,6 +236,7 @@ export default function SimpleMap(props) {
   const [showPath, setShowPath] = useState(true);
 
   const [displayMessage, setDisplayMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const classes = useStyles();
 
@@ -379,11 +381,18 @@ export default function SimpleMap(props) {
       // deviceStore = devices;
       setDeviceStore(devices);
       updateMarkers(devices);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setErrorAnchorEl(document.getElementById('root'));
     }
   };
 
   const handlePopoverClose = () => {
     setAnchorEl(null);
+  };
+  const handleErrorPopoverClose = () => {
+    setErrorAnchorEl(null);
   };
 
   const handleRefresh = async () => {
@@ -508,6 +517,22 @@ export default function SimpleMap(props) {
       >
         <MessageBox message={displayMessage} />
         {/* <Typography className={classes.popover}>Hello, world.</Typography> */}
+      </Popover>
+
+      <Popover
+        open={Boolean(errorAnchorEl && errorMessage)}
+        anchorEl={anchorEl}
+        onClose={handleErrorPopoverClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Typography className={classes.popover}>{errorMessage}</Typography>
       </Popover>
 
       <DateTimePicker
