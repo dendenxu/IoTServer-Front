@@ -6,6 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
+import Button from '@material-ui/core/Button';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
@@ -40,53 +41,32 @@ const useStyles = makeStyles(theme => ({
       display: 'block',
     },
   },
-  search: {
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    '&:hover': {
-      backgroundColor: fade(theme.palette.common.white, 0.25),
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      width: 'auto',
-    },
-  },
-  searchIcon: {
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputRoot: {
-    color: 'secondary',
-  },
-  inputInput: {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
   sectionDesktop: {
-    display: 'none',
-    [theme.breakpoints.up('md')]: {
-      display: 'flex',
-    },
-  },
-  sectionMobile: {
     display: 'flex',
-    [theme.breakpoints.up('md')]: {
-      display: 'none',
-    },
+  },
+  icon: {
+    margin: theme.spacing(0.75),
+  },
+  item: {
+    background: theme.palette.background.button,
+    color: theme.palette.light.dark,
+    justifyContent: 'left',
+    alignItems: 'center',
+    borderRadius: theme.spacing(2),
+    width: '100%',
+    padding: 0,
+    margin: 0,
+  },
+  flex: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  semibold: {
+    fontFamily: 'Teko',
+    fontWeight: 500,
+    fontSize: '1.2rem',
+    lineHeight: 1.75,
   },
 }));
 
@@ -94,6 +74,7 @@ export default function PrimarySearchAppBar(props) {
   const theme = useTheme();
   const classes = useStyles();
   const history = useHistory();
+  const { email } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -133,61 +114,38 @@ export default function PrimarySearchAppBar(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
-
-  const mobileMenuId = 'primary-search-account-menu-mobile';
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
+      <Typography
+        style={{
+          margin: theme.spacing(1, 2, 0),
+        }}
+      >
+        Logged in as:
+        <br />
+        <strong>{email}</strong>
+      </Typography>
+      <div
+        style={{
+          padding: theme.spacing(1, 2, 1),
+        }}
+      >
+        <Button
+          varian="contained"
+          className={classes.item}
+          size="small"
+          onClick={handleLogout}
         >
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
-      </MenuItem>
-      <MenuItem onClick={handleLogout}>
-        <IconButton
-          // aria-label="account of current user"
-          // aria-controls="primary-search-account-menu"
-          // aria-haspopup="true"
-          color="inherit"
-        >
-          <ExitToAppIcon />
-        </IconButton>
-
-        <p>Logout</p>
-      </MenuItem>
+          <div className={`${classes.icon} ${classes.flex}`}>
+            <IconButton size="small">
+              <ExitToAppIcon />
+            </IconButton>
+          </div>
+          <div className={classes.flex}>
+            <Typography component="p" className={classes.semibold}>
+              Logout
+            </Typography>
+          </div>
+        </Button>
+      </div>
     </Menu>
   );
 
@@ -200,35 +158,8 @@ export default function PrimarySearchAppBar(props) {
     >
       <Toolbar className={classes.root}>
         <Icon className={classes.logo} />
-        <div className={classes.search}>
-          <div className={classes.searchIcon}>
-            <SearchIcon
-              style={{
-                color: theme.palette.light.dark,
-              }}
-            />
-          </div>
-          <InputBase
-            placeholder="Search…"
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-            inputProps={{ 'aria-label': 'search' }}
-          />
-        </div>
         <div className={classes.grow} />
         <div className={classes.sectionDesktop}>
-          <IconButton aria-label="show 4 new mails">
-            <Badge badgeContent={4} color="error">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <IconButton aria-label="show 17 new notifications">
-            <Badge badgeContent={17} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
           <IconButton
             aria-label="account of current user"
             aria-controls={menuId}
@@ -237,28 +168,8 @@ export default function PrimarySearchAppBar(props) {
           >
             <AccountCircle />
           </IconButton>
-          <IconButton
-            edge="end"
-            // aria-label="account of current user"
-            // aria-controls="primary-search-account-menu"
-            // aria-haspopup="true"
-            onClick={handleLogout}
-          >
-            <ExitToAppIcon />
-          </IconButton>
-        </div>
-        <div className={classes.sectionMobile}>
-          <IconButton
-            aria-label="show more"
-            aria-controls={mobileMenuId}
-            aria-haspopup="true"
-            onClick={handleMobileMenuOpen}
-          >
-            <MoreIcon />
-          </IconButton>
         </div>
       </Toolbar>
-      {renderMobileMenu}
       {renderMenu}
     </AppBar>
   );

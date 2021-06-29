@@ -138,7 +138,7 @@ function Home(props) {
       style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
     >
       <CssBaseline />
-      <SearchAppBar position="fixed" className={classes.appBar} />
+      <SearchAppBar position="fixed" className={classes.appBar} email={email} />
       <div
         style={{
           display: 'flex',
