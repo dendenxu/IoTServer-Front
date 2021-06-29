@@ -6,11 +6,16 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-param-reassign */
 import React, { useState, useEffect, useCallback } from 'react';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import Popover from '@material-ui/core/Popover';
-import Checkbox from '@material-ui/core/Checkbox';
+import {
+  Button,
+  TextField,
+  Typography,
+  Popover,
+  Checkbox,
+  IconButton,
+  CircularProgress,
+  Chip,
+} from '@material-ui/core/';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {
   DataGrid,
@@ -25,10 +30,20 @@ import {
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import Chip from '@material-ui/core/Chip';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import {
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  Refresh as RefreshIcon,
+  CheckBox as CheckBoxIcon,
+  FlightTakeoff as FlightTakeoffIcon,
+  FlightLand as FlightLandIcon,
+} from '@material-ui/icons';
+
+import moment from 'moment';
+
+import { ReactComponent as RobotIcon } from '../../assets/images/robot.svg';
+import DatePickerButton from '../components/DatePickerButton';
+import DateTimePicker from '../components/DateTimePicker';
+
 import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
 import Loading from '../components/LoadingMask';
@@ -120,6 +135,53 @@ const useStyles = makeStyles(theme => {
         paddingTop: 0,
       },
     },
+
+    headerTitle: {
+      fontWeight: 'bold',
+      display: 'flex',
+    },
+
+    headerDetail: {
+      color: theme.palette.text.secondary,
+      marginLeft: theme.spacing(2),
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'end',
+    },
+
+    headerDetailElement: {
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
+    },
+
+    root: {
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+    },
+
+    tooltip: {
+      position: 'absolute',
+      bottom: theme.spacing(3),
+      left: theme.spacing(3),
+      zIndex: 2000,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      borderRadius: theme.spacing(4),
+      // background: Color(theme.palette.background.widget).alpha(0.75),
+      background: fade(theme.palette.background.widget, 0.75),
+      padding: theme.spacing(2, 2),
+    },
+
+    refreshButton: {
+      marginRight: theme.spacing(1),
+    },
+
+    refreshIndicator: {
+      height: '70%',
+      marginLeft: theme.spacing(1),
+    },
   };
 });
 
@@ -162,7 +224,7 @@ export default function MessageDataGrid(props) {
       // `/api/message/query?page=${pageIndex || 0}&size=${
       // pageSize || defaultPageSize
       // }`,
-      `/api/message/query`,
+      `/api/message/query?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     );
     if (res.ok) {
       const body = await res.json();
@@ -216,13 +278,6 @@ export default function MessageDataGrid(props) {
       editable: true,
       renderCell: renderBold,
     },
-    // {
-    //   field: 'name',
-    //   headerName: 'Device',
-    //   flex: 0.08,
-    //   editable: false,
-    //   renderCell: renderBold,
-    // },
     {
       field: 'info',
       headerName: 'Infomation',
@@ -275,14 +330,25 @@ export default function MessageDataGrid(props) {
     },
   ];
 
-  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
 
-  const CustomLoadingOverlay = () => <Loading loadingData />;
+  const [fromAnchorEl, setFromAnchorEl] = useState(null);
+  const [toAnchorEl, setToAnchorEl] = useState(null);
+
+  const [from, setFrom] = useState(new Date(1624774564339));
+  const [to, setTo] = useState(new Date(1624947224752));
+
+  useEffect(() => {
+    // we'd like the user to click refresh manually since it might introduce too much load if not
+    setNeedRefresh(true);
+  }, [from, to]);
 
   const handleRefresh = async e => {
-    setLoading(true);
+    setLoadingData(true);
     await fetchDataFromServer(curPage, curPageSize);
-    setLoading(false);
+    setLoadingData(false);
+    setNeedRefresh(false);
   };
 
   const handlePopoverClose = () => {
@@ -305,15 +371,75 @@ export default function MessageDataGrid(props) {
   const handlePageChange = async params => {
     console.log(params);
     const { page, pageSize } = params;
-    setLoading(true);
+    setLoadingData(true);
     setCurPage(page);
     setCurPageSize(pageSize);
     await fetchDataFromServer(page, pageSize);
-    setLoading(false);
+    setLoadingData(false);
   };
 
   return (
     <div className={classes.table}>
+      <div className={classes.header}>
+        <Typography
+          variant="h5"
+          color="primary"
+          className={classes.headerTitle}
+        >
+          Device Activity
+        </Typography>
+
+        <Typography
+          variant="body1"
+          component="span"
+          className={classes.headerDetail}
+        >
+          Device activity rank from{` `}
+          <DatePickerButton
+            date={from}
+            setAnchorEl={setFromAnchorEl}
+            className={classes.headerDetailElement}
+          />
+          {` `}to{` `}
+          <DatePickerButton
+            date={to}
+            setAnchorEl={setToAnchorEl}
+            className={classes.headerDetailElement}
+          />
+          <IconButton
+            aria-label="search"
+            onClick={handleRefresh}
+            size="small"
+            className={classes.refreshButton}
+          >
+            <RefreshIcon
+              style={{
+                color: needRefresh
+                  ? theme.palette.warning.main
+                  : theme.palette.primary.main,
+              }}
+            />
+          </IconButton>
+          {loadingData && (
+            <CircularProgress className={classes.refreshIndicator} size={24} />
+          )}
+        </Typography>
+      </div>
+
+      <DateTimePicker
+        start
+        anchorEl={fromAnchorEl}
+        setAnchorEl={setFromAnchorEl}
+        date={from}
+        setDate={setFrom}
+      />
+      <DateTimePicker
+        anchorEl={toAnchorEl}
+        setAnchorEl={setToAnchorEl}
+        date={to}
+        setDate={setTo}
+      />
+
       <Popover
         open={Boolean(anchorEl && errorMessage)}
         anchorEl={anchorEl}
@@ -344,10 +470,8 @@ export default function MessageDataGrid(props) {
         // rowCount={16384}
         // paginationMode="server"
         // onPageChange={handlePageChange}
-        loading={loading}
         components={{
           Toolbar: CustomToolbar,
-          LoadingOverlay: CustomLoadingOverlay,
         }}
       />
     </div>

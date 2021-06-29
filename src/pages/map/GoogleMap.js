@@ -415,7 +415,11 @@ export default function SimpleMap(props) {
           Device Activity
         </Typography>
 
-        <Typography variant="body1" className={classes.headerDetail}>
+        <Typography
+          variant="body1"
+          component="span"
+          className={classes.headerDetail}
+        >
           Device activity rank from{` `}
           <DatePickerButton
             date={from}

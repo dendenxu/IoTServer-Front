@@ -20,13 +20,15 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import { ReactComponent as Icon } from '../../assets/images/icon.svg';
 
+import Copyright from '../components/Copyright';
+
 const useStyles = makeStyles(theme => ({
   root: {
     paddingLeft: 0,
   },
   logo: {
-    height: '30px',
-    width: global.drawerWidth,
+    height: 30,
+    width: 160,
     marginLeft: 0,
   },
   grow: {
@@ -45,7 +47,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
   },
   icon: {
-    margin: theme.spacing(0.75),
+    margin: theme.spacing(1.5),
   },
   item: {
     background: theme.palette.background.button,
@@ -135,9 +137,7 @@ export default function PrimarySearchAppBar(props) {
           onClick={handleLogout}
         >
           <div className={`${classes.icon} ${classes.flex}`}>
-            <IconButton size="small">
-              <ExitToAppIcon />
-            </IconButton>
+            <ExitToAppIcon />
           </div>
           <div className={classes.flex}>
             <Typography component="p" className={classes.semibold}>
@@ -158,6 +158,8 @@ export default function PrimarySearchAppBar(props) {
     >
       <Toolbar className={classes.root}>
         <Icon className={classes.logo} />
+        {/* <Copyright /> */}
+        {props.children}
         <div className={classes.grow} />
         <div className={classes.sectionDesktop}>
           <IconButton

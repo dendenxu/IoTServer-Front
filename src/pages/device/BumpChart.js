@@ -3,19 +3,14 @@ import { ResponsiveAreaBump } from '@nivo/bump';
 import React, { useState, useEffect } from 'react';
 import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Popover from '@material-ui/core/Popover';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
-import Link from '@material-ui/core/Link';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import tempBump from '../../assets/temp/tempBump';
 import chartTheme from '../../theme/chartTheme';
-import Loading from '../components/LoadingMask';
 
 import DatePickerButton from '../components/DatePickerButton';
 import DateTimePicker from '../components/DateTimePicker';
@@ -178,7 +173,11 @@ export default function BumpChart(props) {
           Device Activity
         </Typography>
 
-        <Typography variant="body1" className={classes.headerDetail}>
+        <Typography
+          component="span"
+          variant="body1"
+          className={classes.headerDetail}
+        >
           Device activity rank from{` `}
           <DatePickerButton
             date={from}

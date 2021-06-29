@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     padding: theme.spacing(1),
     overflow: 'auto',
-    maxHeight: '100vh',
+    height: '100vh',
     border: 'none',
   },
 }));
@@ -65,7 +65,7 @@ function Home(props) {
   const [countDown, setCountDown] = useState(5);
   const [email, setEmail] = useState(location.state && location.state.email);
   const [loadingData, setLoadingData] = useState(true);
-  const [selected, setSelected] = useState(1);
+  const [selected, setSelected] = useState(2);
 
   const [deviceData, setDeviceData] = useState(
     JSON.parse(localStorage.getItem('device_table_data')) || [],
@@ -138,16 +138,16 @@ function Home(props) {
       style={{ filter: loadingData ? 'blur(5px)' : 'blur(0)' }}
     >
       <CssBaseline />
-      <SearchAppBar position="fixed" className={classes.appBar} email={email} />
+      <SearchAppBar position="fixed" className={classes.appBar} email={email}>
+        <SectionDrawer selected={selected} setSelected={setSelected} />
+      </SearchAppBar>
       <div
         style={{
           display: 'flex',
         }}
       >
-        <SectionDrawer selected={selected} setSelected={setSelected} />
         <div className={classes.content}>
           <Toolbar />
-          {/* <MessageTable email={email} /> */}
 
           <IndexedWrapper index={0} selected={selected}>
             <div
@@ -170,6 +170,9 @@ function Home(props) {
           </IndexedWrapper>
           <IndexedWrapper index={1} selected={selected}>
             <GoogleMap />
+          </IndexedWrapper>
+          <IndexedWrapper index={2} selected={selected}>
+            <MessageTable />
           </IndexedWrapper>
         </div>
       </div>

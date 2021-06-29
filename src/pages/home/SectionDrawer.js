@@ -1,30 +1,12 @@
 import React from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
+import { Divider } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
-    // position: 'absolute',
-    top: 0,
-    // bottom: 0,
-    left: 0,
-    // flexGrow: 1,
-    // flexDirection: 'column',
-    height: '100vh',
-    width: global.drawerWidth,
+    display: 'flex',
     zIndex: 1200,
     backgroundColor: theme.palette.background.paper,
   },
@@ -38,12 +20,17 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1.5),
   },
   item: {
-    background: theme.palette.background.button,
+    // background: theme.palette.background.button,
     color: theme.palette.light.dark,
     justifyContent: 'left',
     alignItems: 'center',
-    margin: theme.spacing(0, 0),
-    borderRadius: theme.spacing(2),
+    // borderRadius: theme.spacing(2),
+    // height: "100%",
+    // height: 56,
+    height: 56,
+    maxWidth: '20%',
+    padding: theme.spacing(0, 1, 0),
+    margin: 0,
   },
   flex: {
     display: 'flex',
@@ -66,66 +53,51 @@ const ListButton = props => {
   const classes = useStyles();
 
   return (
-    <ListItem key={text}>
-      <Button
-        varian="contained"
-        className={classes.item}
-        fullWidth
-        size="small"
-        {...other}
+    <Button varian="contained" className={classes.item} {...other}>
+      <Typography
+        component="p"
+        className={classes.semibold}
+        key={`${text}-text`}
       >
-        <div className={`${classes.icon} ${classes.flex}`}>
-          {props.children}
-        </div>
-        <div className={classes.flex}>
-          <Typography component="p" className={classes.semibold}>
-            {text}
-          </Typography>
-        </div>
-      </Button>
-    </ListItem>
+        {text}
+      </Typography>
+    </Button>
+  );
+};
+
+const VDivider = props => {
+  const theme = useTheme();
+
+  return (
+    <Divider
+      {...props}
+      orientation="vertical"
+      style={{
+        color: theme.palette.background.button,
+        height: 42,
+      }}
+    />
   );
 };
 
 export default function SectionDrawer(props) {
-  const classes = useStyles();
-  const theme = useTheme();
-
   const { style, className, selecled, setSelected, ...other } = props;
 
   return (
-    <div
-      variant="permanent"
-      className={`${classes.drawer} ${className}`}
-      style={{
-        ...style,
-      }}
-      {...other}
-    >
-      <Toolbar />
-      <div className={classes.drawerContainer}>
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListButton
-              text={text}
-              key={text}
-              onClick={() => {
-                setSelected(index);
-              }}
-            >
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListButton>
-          ))}
-        </List>
-        <Divider className={classes.divide} />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListButton text={text} key={text}>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListButton>
-          ))}
-        </List>
-      </div>
-    </div>
+    <>
+      <VDivider key="starting-divider" />
+      {['Device Manager', 'Device Map', 'Message Manager'].map(
+        (text, index) => [
+          <ListButton
+            text={text}
+            key={text}
+            onClick={() => {
+              setSelected(index);
+            }}
+          />,
+          <VDivider key={`${text}-divider`} />,
+        ],
+      )}
+    </>
   );
 }
