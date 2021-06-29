@@ -310,6 +310,7 @@ export default function SimpleMap(props) {
     });
 
     console.log('geo', geo);
+
     layer.setSource(geo, {
       // altitude: (index, feature) => feature.properties.type * 100,
       altitude: 0,
@@ -326,6 +327,17 @@ export default function SimpleMap(props) {
     });
     loca.add(layer);
     loca.animate.start();
+
+    console.log(
+      `%cCurrent showPath: ${showPath}`,
+      'background: #222; color: #bada55',
+    );
+    if (!showPath) {
+      if (layer) {
+        loca.remove(layer);
+      }
+      loca.viewControl.clearAnimates();
+    }
   };
 
   const fetchGeoFromServer = async () => {
@@ -406,9 +418,7 @@ export default function SimpleMap(props) {
     if (layer) {
       loca.remove(layer);
     }
-    // loca.remove(null);
     loca.viewControl.clearAnimates();
-    console.log(loca);
 
     const fetchGeo = fetchGeoFromServer();
     const fetchDetail = fetchDetailFromServer();
@@ -427,7 +437,6 @@ export default function SimpleMap(props) {
       if (layer) {
         loca.remove(layer);
       }
-      // loca.remove(null);
       loca.viewControl.clearAnimates();
     }
   };
