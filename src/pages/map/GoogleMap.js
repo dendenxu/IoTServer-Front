@@ -301,8 +301,9 @@ export default function SimpleMap(props) {
   }, []);
 
   const updateGeo = geo => {
+    // ! it looks like calling PulseLineLayer with loca will add it to loca
     layer = new Loca.PulseLineLayer({
-      loca,
+      // loca,
       zIndex: 100,
       opacity: 0.7,
       visible: true,
@@ -310,6 +311,8 @@ export default function SimpleMap(props) {
     });
 
     console.log('geo', geo);
+
+    console.log(loca.layers);
 
     layer.setSource(geo, {
       // altitude: (index, feature) => feature.properties.type * 100,
@@ -325,18 +328,14 @@ export default function SimpleMap(props) {
       // 脉冲线的速度，几秒钟跑完整段路
       duration: 30000,
     });
-    loca.add(layer);
-    loca.animate.start();
 
     console.log(
       `%cCurrent showPath: ${showPath}`,
       'background: #222; color: #bada55',
     );
-    if (!showPath) {
-      if (layer) {
-        loca.remove(layer);
-      }
-      loca.viewControl.clearAnimates();
+    if (showPath) {
+      loca.add(layer);
+      loca.animate.start();
     }
   };
 
