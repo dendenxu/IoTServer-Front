@@ -15,10 +15,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import tempBump from '../../assets/temp/tempBump';
 import chartTheme from '../../theme/chartTheme';
-import Loading from './LoadingMask';
+import Loading from '../components/LoadingMask';
 
-import DatePickerButton from './DatePickerButton';
-import DateTimePicker from './DateTimePicker';
+import DatePickerButton from '../components/DatePickerButton';
+import DateTimePicker from '../components/DateTimePicker';
 
 const useStyles = makeStyles(theme => ({
   table: {

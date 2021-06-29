@@ -31,9 +31,9 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
-import IoTButton from './IoTButton';
+import IoTButton from '../components/IoTButton';
 import tempData from '../../assets/temp/tempData';
-import Loading from './LoadingMask';
+import Loading from '../components/LoadingMask';
 
 const useStyles = makeStyles(theme => {
   const noOutline = {

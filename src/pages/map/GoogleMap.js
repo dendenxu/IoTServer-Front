@@ -20,8 +20,10 @@ import FlightLandIcon from '@material-ui/icons/FlightLand';
 import Color from 'color';
 
 import { ReactComponent as RobotIcon } from '../../assets/images/robot.svg';
-import DatePickerButton from './DatePickerButton';
-import DateTimePicker from './DateTimePicker';
+import DatePickerButton from '../components/DatePickerButton';
+import DateTimePicker from '../components/DateTimePicker';
+
+import MessageBox from './MessageBox';
 
 const useStyles = makeStyles(theme => ({
   popover: {
@@ -234,6 +236,8 @@ export default function SimpleMap(props) {
 
   const [showPath, setShowPath] = useState(true);
 
+  const [displayMessage, setDisplayMessage] = useState('');
+
   const classes = useStyles();
 
   const theme = useTheme();
@@ -343,6 +347,7 @@ export default function SimpleMap(props) {
           marker.on('click', e => {
             console.log(`Clicked marker`);
             console.log(e);
+            setDisplayMessage(message);
             setAnchorEl(e.originEvent.target);
           });
         });
@@ -471,7 +476,7 @@ export default function SimpleMap(props) {
       </div>
 
       <Popover
-        open={Boolean(anchorEl)}
+        open={Boolean(anchorEl && displayMessage)}
         anchorEl={anchorEl}
         onClose={handlePopoverClose}
         anchorOrigin={{
@@ -483,7 +488,8 @@ export default function SimpleMap(props) {
           horizontal: 'left',
         }}
       >
-        <Typography className={classes.popover}>Hello, world.</Typography>
+        <MessageBox message={displayMessage} />
+        {/* <Typography className={classes.popover}>Hello, world.</Typography> */}
       </Popover>
 
       <DateTimePicker

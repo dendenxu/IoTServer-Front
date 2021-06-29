@@ -20,14 +20,14 @@ import Copyright from '../components/Copyright';
 import AvatarBar from '../components/AvatarBar';
 import IoTextField from '../components/IoTextField';
 import IoTButton from '../components/IoTButton';
-import PieChart from '../components/PieChart';
-import BumpChart from '../components/BumpChart';
-import FunnelChart from '../components/FunnelChart';
+import PieChart from '../device/PieChart';
+import BumpChart from '../device/BumpChart';
+import FunnelChart from '../device/FunnelChart';
 import SearchAppBar from './SearchAppBar';
 import SectionDrawer from './SectionDrawer';
-import DeviceTable from '../components/DeviceTable';
-import MessageTable from './MessageTable';
-import GoogleMap from '../components/GoogleMap';
+import DeviceTable from '../device/DeviceTable';
+import MessageTable from '../message/MessageTable';
+import GoogleMap from '../map/GoogleMap';
 
 const useStyles = makeStyles(theme => ({
   growWidth: {
