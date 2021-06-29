@@ -218,8 +218,6 @@ let Loca = null;
 let layer = null;
 
 export default function SimpleMap(props) {
-  const [fromMills, setFromMills] = useState(1624843660000);
-  const [toMills, setToMills] = useState(1624844080000);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [loadingData, setLoadingData] = useState(false);
@@ -228,8 +226,8 @@ export default function SimpleMap(props) {
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
 
-  const [from, setFrom] = useState(new Date(1624666885920));
-  const [to, setTo] = useState(new Date(1624673885920));
+  const [from, setFrom] = useState(new Date(1624944564339));
+  const [to, setTo] = useState(new Date(1624989224752));
 
   const [deviceStore, setDeviceStore] = useState(null);
   const [geoStore, setGeoStore] = useState(null);
@@ -247,37 +245,53 @@ export default function SimpleMap(props) {
     setNeedRefresh(true);
   }, [from, to]);
 
-  useEffect(async () => {
-    setLoadingData(true);
-    if (!window.Loca && !window.AMap) {
+  useEffect(() => {
+    const setJob = async () => {
+      setLoadingData(true);
+      // if (!window.Loca && !window.AMap) {
       await loadAMap();
-    }
+      // }
 
-    AMap = window.AMap;
-    Loca = window.Loca;
+      AMap = window.AMap;
+      Loca = window.Loca;
 
-    // Extract the global variable
-    // ? what t f? does the variable name need to be exactly map???
-    map = new AMap.Map('map', {
-      zoom: 11.2,
-      center: [119.9, 30.1],
-      // showLabel: false,
-      viewMode: '3D',
-      mapStyle: 'amap://styles/dark',
-      pitch: 0,
-    });
+      // Extract the global variable
+      // ? what t f? does the variable name need to be exactly map???
 
-    console.log(map);
+      map = new AMap.Map('map', {
+        zoom: 11.2,
+        center: [119.9, 30.1],
+        // showLabel: false,
+        viewMode: '3D',
+        mapStyle: 'amap://styles/dark',
+        pitch: 0,
+      });
 
-    loca = new Loca.Container({
-      map,
-    });
+      console.log(map);
 
-    const fetchGeo = fetchGeoFromServer();
-    const fetchDetail = fetchDetailFromServer();
-    await Promise.all([fetchGeo, fetchDetail]);
-    setLoadingData(false);
-    setNeedRefresh(false);
+      loca = new Loca.Container({
+        map,
+      });
+      console.log(loca);
+
+      const fetchGeo = fetchGeoFromServer();
+      const fetchDetail = fetchDetailFromServer();
+      await Promise.all([fetchGeo, fetchDetail]);
+      setLoadingData(false);
+      setNeedRefresh(false);
+    };
+
+    setJob();
+
+    return () => {
+      // 虽然这样是可以了，但是你会发现，切换页面以后，再切换回来，3D图没有了，水波图也没有了！！
+      // 这已经是一个很严重的bug了，但是官方问答貌似没有很明确的说明。
+      // 原因是：loca实例只能创建一个，虽然这里创建loca实例时只是使用了局部变量，但是高德地图生成了全局的loca实例。当我们切换页面再切回来时，又去创建一个实例，这时就有两个了，然后就是看到的效果，图出不来。
+      // 最终的解决方案是，当前页面离开时，销毁loca实例。销毁不是直接置为Null就可以，而是要调loca的destroy方法。
+      console.error('Destorying the loca variable');
+      loca.remove(layer);
+      loca.destroy();
+    };
   }, []);
 
   const updateGeo = geo => {
@@ -311,7 +325,7 @@ export default function SimpleMap(props) {
   const fetchGeoFromServer = async () => {
     // Only load Loca and AMap on tab switch
     const geo = new Loca.GeoJSONSource({
-      url: `/api/message/route?fromMills=${fromMills}&toMills=${toMills}`,
+      url: `/api/message/route?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     });
 
     updateGeo(geo);
@@ -357,7 +371,7 @@ export default function SimpleMap(props) {
 
   const fetchDetailFromServer = async () => {
     const res = await fetch(
-      `/api/message/structured?fromMills=${fromMills}&toMills=${toMills}`,
+      `/api/message/structured?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     );
 
     if (res.ok) {

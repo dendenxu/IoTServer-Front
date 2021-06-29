@@ -210,7 +210,9 @@ export default function MessageDataGrid(props) {
   }, [data]);
 
   useEffect(() => {
+    setLoadingData(true);
     fetchDataFromServer();
+    setLoadingData(false);
   }, []);
 
   const processPayload = payload => {

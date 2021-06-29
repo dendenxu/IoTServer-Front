@@ -18,8 +18,8 @@ export default function decorateFetch(origin, protocol) {
       const finalOptions = options || { headers: {} }; // getting a reference
       finalOptions.credentials = 'include';
 
-      console.warn(`Apply base url: ${url}, result: ${finalUrl}`);
-      console.warn(`Modifying credentials to: include`);
+      console.log(`Apply base url: ${url}, result: ${finalUrl}`);
+      console.log(`Modifying credentials to: include`);
       return global.originalFetch(finalUrl, finalOptions);
     } else {
       return global.originalFetch(url, options);
