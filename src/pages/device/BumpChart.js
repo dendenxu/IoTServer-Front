@@ -5,6 +5,8 @@ import { fade, makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
+import Popover from '@material-ui/core/Popover';
+
 import RefreshIcon from '@material-ui/icons/Refresh';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -16,6 +18,13 @@ import DatePickerButton from '../components/DatePickerButton';
 import DateTimePicker from '../components/DateTimePicker';
 
 const useStyles = makeStyles(theme => ({
+  popover: {
+    padding: theme.spacing(1),
+    background: theme.palette.error.main,
+    color: theme.palette.text.dark,
+    fontWeight: 'bold',
+  },
+
   table: {
     height: '90%',
     width: '100%',
@@ -113,6 +122,9 @@ export default function BumpChart(props) {
   const classes = useStyles();
   const [data, setData] = useState(tempBump);
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
@@ -131,6 +143,10 @@ export default function BumpChart(props) {
     if (res.ok) {
       const body = await res.json();
       setData(body);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setAnchorEl(document.getElementById('root'));
     }
     setLoadingData(false);
     setNeedRefresh(false);
@@ -160,6 +176,10 @@ export default function BumpChart(props) {
 
   const handleRefresh = () => {
     fetchDataFromServer(from.getTime(), to.getTime(), tick);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -237,6 +257,23 @@ export default function BumpChart(props) {
           setDate={setTo}
         />
       </div>
+
+      <Popover
+        open={Boolean(anchorEl && errorMessage)}
+        anchorEl={anchorEl}
+        onClose={handlePopoverClose}
+        onClick={handlePopoverClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Typography className={classes.popover}>{errorMessage}</Typography>
+      </Popover>
 
       <div className={classes.table}>
         <MyResponsiveAreaBump data={data} theme={chartTheme} />
