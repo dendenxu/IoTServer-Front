@@ -21,7 +21,7 @@ const DatePickerButton = props => {
       }}
       {...other}
     >
-      {moment(date).format('yyyy-MM-DD hh:mm:ss')}
+      {moment(date).format('yyyy-MM-DD HH:mm:ss')}
     </Button>
   );
 };

@@ -25,6 +25,8 @@ import DateTimePicker from '../components/DateTimePicker';
 
 import MessageBox from './MessageBox';
 
+import deviceColors from '../components/DeviceColors';
+
 const useStyles = makeStyles(theme => ({
   popover: {
     padding: theme.spacing(1),
@@ -124,31 +126,6 @@ const loadAMap = async () => {
   });
 };
 
-const rawDeviceColors = [
-  // '#EFBB51',
-  // '#A06BFF',
-  // '#79C2AD',
-  // '#F895F0',
-  // '#96E1FF',
-  // '#E06AC4',
-  // '#89A4E0',
-  // '#F15C1A',
-  '#E93B81',
-  '#F5ABC9',
-  '#FFE5E2',
-  '#B6C9F0',
-  '#E99497',
-  '#F3C583',
-  '#E8E46E',
-  '#B3E283',
-  '#867AE9',
-  '#FFF5AB',
-  '#FFCEAD',
-  '#C449C2',
-];
-
-const deviceColors = i => rawDeviceColors[i % rawDeviceColors.length];
-
 const BubbleMarker = props => {
   const { message, ...other } = props;
   let { color } = props;
@@ -211,6 +188,28 @@ const BubbleMarker = props => {
   );
 };
 
+const LeftUpPopover = props => {
+  const { anchorEl, handleClose, isOpen, ...other } = props;
+  return (
+    <Popover
+      open={isOpen}
+      anchorEl={anchorEl}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'left',
+      }}
+      {...other}
+    >
+      {props.children}
+    </Popover>
+  );
+};
+
 let loca = null;
 let map = null;
 let AMap = null;
@@ -218,9 +217,8 @@ let Loca = null;
 let layer = null;
 
 export default function SimpleMap(props) {
-  const [fromMills, setFromMills] = useState(1624843660000);
-  const [toMills, setToMills] = useState(1624844080000);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [errorAnchorEl, setErrorAnchorEl] = useState(null);
 
   const [loadingData, setLoadingData] = useState(false);
   const [needRefresh, setNeedRefresh] = useState(false);
@@ -228,8 +226,8 @@ export default function SimpleMap(props) {
   const [fromAnchorEl, setFromAnchorEl] = useState(null);
   const [toAnchorEl, setToAnchorEl] = useState(null);
 
-  const [from, setFrom] = useState(new Date(1624666885920));
-  const [to, setTo] = useState(new Date(1624673885920));
+  const [from, setFrom] = useState(new Date(1624944564339));
+  const [to, setTo] = useState(new Date(1624989224752));
 
   const [deviceStore, setDeviceStore] = useState(null);
   const [geoStore, setGeoStore] = useState(null);
@@ -237,6 +235,8 @@ export default function SimpleMap(props) {
   const [showPath, setShowPath] = useState(true);
 
   const [displayMessage, setDisplayMessage] = useState('');
+  const [displayDevice, setDisplayDevice] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const classes = useStyles();
 
@@ -247,42 +247,63 @@ export default function SimpleMap(props) {
     setNeedRefresh(true);
   }, [from, to]);
 
-  useEffect(async () => {
-    setLoadingData(true);
-    if (!window.Loca && !window.AMap) {
-      await loadAMap();
-    }
+  useEffect(() => {
+    const setJob = async () => {
+      setLoadingData(true);
 
-    AMap = window.AMap;
-    Loca = window.Loca;
+      try {
+        await loadAMap();
+      } catch (e) {
+        setErrorMessage(e);
+        setErrorAnchorEl(document.getElementById('root'));
+      }
 
-    // Extract the global variable
-    // ? what t f? does the variable name need to be exactly map???
-    map = new AMap.Map('map', {
-      zoom: 11.2,
-      center: [119.9, 30.1],
-      // showLabel: false,
-      viewMode: '3D',
-      mapStyle: 'amap://styles/dark',
-      pitch: 0,
-    });
+      AMap = window.AMap;
+      Loca = window.Loca;
 
-    console.log(map);
+      // Extract the global variable
+      // ? what t f? does the variable name need to be exactly map???
 
-    loca = new Loca.Container({
-      map,
-    });
+      map = new AMap.Map('map', {
+        zoom: 11.2,
+        center: [119.9, 30.1],
+        // showLabel: false,
+        viewMode: '3D',
+        mapStyle: 'amap://styles/dark',
+        pitch: 0,
+      });
 
-    const fetchGeo = fetchGeoFromServer();
-    const fetchDetail = fetchDetailFromServer();
-    await Promise.all([fetchGeo, fetchDetail]);
-    setLoadingData(false);
-    setNeedRefresh(false);
+      console.log(map);
+
+      loca = new Loca.Container({
+        map,
+      });
+      console.log(loca);
+
+      const fetchGeo = fetchGeoFromServer();
+      const fetchDetail = fetchDetailFromServer();
+      await Promise.all([fetchGeo, fetchDetail]);
+      setLoadingData(false);
+      setNeedRefresh(false);
+    };
+
+    setJob();
+
+    return () => {
+      // 虽然这样是可以了，但是你会发现，切换页面以后，再切换回来，3D图没有了，水波图也没有了！！
+      // 这已经是一个很严重的bug了，但是官方问答貌似没有很明确的说明。
+      // 原因是：loca实例只能创建一个，虽然这里创建loca实例时只是使用了局部变量，但是高德地图生成了全局的loca实例。当我们切换页面再切回来时，又去创建一个实例，这时就有两个了，然后就是看到的效果，图出不来。
+      // 最终的解决方案是，当前页面离开时，销毁loca实例。销毁不是直接置为Null就可以，而是要调loca的destroy方法。
+      console.log('Destorying the loca variable');
+      loca.remove(layer);
+      loca.destroy();
+    };
   }, []);
 
   const updateGeo = geo => {
+    // ! it looks like calling PulseLineLayer with loca will add it to loca
     layer = new Loca.PulseLineLayer({
-      loca,
+      // loca,
       zIndex: 100,
       opacity: 0.7,
       visible: true,
@@ -290,6 +311,9 @@ export default function SimpleMap(props) {
     });
 
     console.log('geo', geo);
+
+    console.log(loca.layers);
+
     layer.setSource(geo, {
       // altitude: (index, feature) => feature.properties.type * 100,
       altitude: 0,
@@ -304,14 +328,21 @@ export default function SimpleMap(props) {
       // 脉冲线的速度，几秒钟跑完整段路
       duration: 30000,
     });
-    loca.add(layer);
-    loca.animate.start();
+
+    console.log(
+      `%cCurrent showPath: ${showPath}`,
+      'background: #222; color: #bada55',
+    );
+    if (showPath) {
+      loca.add(layer);
+      loca.animate.start();
+    }
   };
 
   const fetchGeoFromServer = async () => {
     // Only load Loca and AMap on tab switch
     const geo = new Loca.GeoJSONSource({
-      url: `/api/message/route?fromMills=${fromMills}&toMills=${toMills}`,
+      url: `/api/message/route?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     });
 
     updateGeo(geo);
@@ -348,6 +379,7 @@ export default function SimpleMap(props) {
             console.log(`Clicked marker`);
             console.log(e);
             setDisplayMessage(message);
+            setDisplayDevice(device);
             setAnchorEl(e.originEvent.target);
           });
         });
@@ -357,7 +389,7 @@ export default function SimpleMap(props) {
 
   const fetchDetailFromServer = async () => {
     const res = await fetch(
-      `/api/message/structured?fromMills=${fromMills}&toMills=${toMills}`,
+      `/api/message/structured?fromMills=${from.getTime()}&toMills=${to.getTime()}`,
     );
 
     if (res.ok) {
@@ -365,11 +397,18 @@ export default function SimpleMap(props) {
       // deviceStore = devices;
       setDeviceStore(devices);
       updateMarkers(devices);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setErrorAnchorEl(document.getElementById('root'));
     }
   };
 
   const handlePopoverClose = () => {
     setAnchorEl(null);
+  };
+  const handleErrorPopoverClose = () => {
+    setErrorAnchorEl(null);
   };
 
   const handleRefresh = async () => {
@@ -378,9 +417,7 @@ export default function SimpleMap(props) {
     if (layer) {
       loca.remove(layer);
     }
-    // loca.remove(null);
     loca.viewControl.clearAnimates();
-    console.log(loca);
 
     const fetchGeo = fetchGeoFromServer();
     const fetchDetail = fetchDetailFromServer();
@@ -399,7 +436,6 @@ export default function SimpleMap(props) {
       if (layer) {
         loca.remove(layer);
       }
-      // loca.remove(null);
       loca.viewControl.clearAnimates();
     }
   };
@@ -479,22 +515,21 @@ export default function SimpleMap(props) {
         </Typography>
       </div>
 
-      <Popover
-        open={Boolean(anchorEl && displayMessage)}
+      <LeftUpPopover
+        isOpen={Boolean(anchorEl && displayMessage)}
         anchorEl={anchorEl}
-        onClose={handlePopoverClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+        handleClose={handlePopoverClose}
       >
-        <MessageBox message={displayMessage} />
-        {/* <Typography className={classes.popover}>Hello, world.</Typography> */}
-      </Popover>
+        <MessageBox message={displayMessage} device={displayDevice} />
+      </LeftUpPopover>
+
+      <LeftUpPopover
+        isOpen={Boolean(errorAnchorEl && errorMessage)}
+        anchorEl={errorAnchorEl}
+        handleClose={handleErrorPopoverClose}
+      >
+        <Typography className={classes.popover}>{errorMessage}</Typography>
+      </LeftUpPopover>
 
       <DateTimePicker
         start

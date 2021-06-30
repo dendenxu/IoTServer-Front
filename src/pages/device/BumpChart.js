@@ -118,8 +118,8 @@ export default function BumpChart(props) {
   const [loadingData, setLoadingData] = useState(false);
   const [needRefresh, setNeedRefresh] = useState(false);
 
-  const [from, setFrom] = useState(new Date(1624666885920));
-  const [to, setTo] = useState(new Date(1624673885920));
+  const [from, setFrom] = useState(new Date(1624774564339));
+  const [to, setTo] = useState(new Date(1624947224752));
   const [tick, setTick] = useState(10);
 
   const fetchDataFromServer = async (fromMills, toMills, tick) => {

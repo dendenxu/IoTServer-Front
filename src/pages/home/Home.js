@@ -65,7 +65,7 @@ function Home(props) {
   const [countDown, setCountDown] = useState(5);
   const [email, setEmail] = useState(location.state && location.state.email);
   const [loadingData, setLoadingData] = useState(true);
-  const [selected, setSelected] = useState(2);
+  const [selected, setSelected] = useState(0);
 
   const [deviceData, setDeviceData] = useState(
     JSON.parse(localStorage.getItem('device_table_data')) || [],

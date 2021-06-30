@@ -11,6 +11,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Popover from '@material-ui/core/Popover';
 import Checkbox from '@material-ui/core/Checkbox';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {
   DataGrid,
@@ -125,6 +126,11 @@ const useStyles = makeStyles(theme => {
         paddingTop: 0,
       },
     },
+
+    refreshIndicator: {
+      height: '70%',
+      marginLeft: theme.spacing(1),
+    },
   };
 });
 
@@ -166,12 +172,18 @@ export default function DeviceDataGrid(props) {
   const [errorMessage, setErrorMessage] = useState('');
   const [edit, setEdit] = useState(false);
 
+  const [loadingData, setLoadingData] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('device_table_data', JSON.stringify(data));
   }, [data]);
 
   useEffect(() => {
-    fetchDataFromServer();
+    (async () => {
+      setLoadingData(true);
+      await fetchDataFromServer();
+      setLoadingData(false);
+    })();
   }, []);
 
   const processPayload = (payload, i) => {
@@ -197,11 +209,10 @@ export default function DeviceDataGrid(props) {
 
   useEffect(() => {
     if (!edit) {
-      const it = setTimeout(() => {
-        // for (let i = 0; i < data.length; i++) {
-        //   updateDeviceFromServer(i);
-        // }
-        fetchDataFromServer();
+      const it = setTimeout(async () => {
+        setLoadingData(true);
+        await fetchDataFromServer();
+        setLoadingData(false);
       }, 1000);
 
       return () => {
@@ -224,6 +235,10 @@ export default function DeviceDataGrid(props) {
         processPayload(body[i], i);
       }
       setData(body);
+    } else {
+      const text = await res.text();
+      setErrorMessage(text);
+      setAnchorEl(document.getElementById('root'));
     }
   };
 
@@ -243,11 +258,6 @@ export default function DeviceDataGrid(props) {
         payload,
         ...data.slice(id + 1, data.length),
       ]);
-      // columns.forEach(column => {
-      //   console.log('Updating column: ');
-      //   console.log(column.field);
-      //   data[id][column.field] = payload[column.field];
-      // });
     }
   };
 
@@ -761,13 +771,8 @@ export default function DeviceDataGrid(props) {
     let results = [];
     selection.forEach(i => {
       const row = data[i];
-      results.push(
-        handle(row)
-          .then(() => {})
-          .catch(() => {
-            console.log('Errors');
-          }),
-      );
+      // ! adding a then catch just won't!
+      results.push(handle(row));
     });
     results = (await Promise.all(results)).map(item => item | 0);
     if (!results.every(item => item)) {
@@ -790,14 +795,10 @@ export default function DeviceDataGrid(props) {
     return [status, retained];
   };
 
-  const [loading, setLoading] = useState(false);
-
-  const CustomLoadingOverlay = () => <Loading loadingData />;
-
   const handleRefresh = async e => {
-    setLoading(true);
+    setLoadingData(true);
     await fetchDataFromServer();
-    setLoading(false);
+    setLoadingData(false);
   };
 
   const handleEdit = e => {
@@ -822,6 +823,9 @@ export default function DeviceDataGrid(props) {
         )}
         {edit ? 'Quit Editting' : 'Start Editting'}
       </Button>
+      {loadingData && (
+        <CircularProgress className={classes.refreshIndicator} size={24} />
+      )}
     </GridToolbarContainer>
   );
 
@@ -853,7 +857,6 @@ export default function DeviceDataGrid(props) {
         disableSelectionOnClick
         autoHeight
         autoPageSize
-        loading={loading}
         // hideFooterPagination
         getRowClassName={params => {
           if (params.row.new) {
@@ -890,7 +893,6 @@ export default function DeviceDataGrid(props) {
         }}
         components={{
           Toolbar: CustomToolbar,
-          LoadingOverlay: CustomLoadingOverlay,
         }}
       />
       {edit && (
